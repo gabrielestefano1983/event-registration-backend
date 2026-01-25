@@ -17,22 +17,23 @@
                 🟢 Capogruppo / Referente (Obbligatorio)
             </span>
             <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
-                <input type="text" id="leader-name" placeholder="Nome e Cognome completo"
+                <input type="text" id="leader-name" placeholder="Nome e Cognome completo" value="Stefano Gabriele"
                     style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box;">
 
                 <div>
                     <input type="email" id="leader-email" placeholder="Indirizzo Email per ricevere i biglietti"
+                        value="gabriele.stefano@emal.it"
                         style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;">
                     <div id="email-error"
                         style="color: #e53e3e; font-size: 0.75rem; margin-top: 5px; display: none; font-weight: 600;">
                         Inserisci un indirizzo email valido.</div>
                 </div>
 
-                <input type="tel" id="leader-telefono" placeholder="Numero di telefono *" required
+                <input type="tel" id="leader-telefono" placeholder="Numero di telefono *" required value="3403983926"
                     style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box;">
 
                 <textarea id="leader-note" placeholder="Note (allergie, esigenze speciali - opzionale)"
-                    style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box; resize:vertical; min-height:60px; font-family:inherit;"></textarea>
+                    style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box; resize:vertical; min-height:60px; font-family:inherit;">Intollerante al lattosio!</textarea>
 
                 <div
                     style="font-size: 0.9rem; color: #2c5282; font-weight: 700; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #bee3f8;">
@@ -75,8 +76,14 @@
     const API_BASE = 'https://remarkable-biscochitos-1c0f1e.netlify.app/api';
     const PREZZI = { adulto: 10, ragazzo: 5, minore: 0 };
 
-    // Stato dell'applicazione
-    let leaderData = { nome: '', email: '', telefono: '', note: '', tipo: 'adulto' };
+    // Stato dell'applicazione - con valori di default per testing
+    let leaderData = {
+        nome: 'Stefano Gabriele',
+        email: 'gabriele.stefano@emal.it',
+        telefono: '3403983926',
+        note: 'Intollerante al lattosio!',
+        tipo: 'adulto'
+    };
     let extraParticipants = [];
 
     const extrasListEl = document.getElementById('extras-list');
