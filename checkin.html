@@ -34,10 +34,13 @@
             display: none;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            /* Was center */
             width: 100%;
             height: 100%;
             padding: 20px;
+            padding-top: 40px;
+            /* More space from header */
             box-sizing: border-box;
         }
 
@@ -66,7 +69,14 @@
         #reader {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+        }
+
+        /* Force video to fill the square container */
+        #reader video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 16px;
         }
 
         /* CONTROLS */
@@ -212,7 +222,7 @@
 <body>
 
     <header>
-        Loredoperlavita Check-in
+        Staff Check-in Scanner
     </header>
 
     <!-- MAIN CAMERA VIEW -->
