@@ -27,7 +27,7 @@ const getTicketEmailHtml = (nome, tipoBiglietto, qrUrl) => {
         <div class="container">
             <div class="header">
                 <h1>Il tuo Biglietto</h1>
-                <p style="margin: 5px 0 0; opacity: 0.9;">Loredoperlavita Eventi</p>
+                <p style="margin: 5px 0 0; opacity: 0.9;">Evento: Presentazione della LorEdo per la Vita</p>
             </div>
             <div class="content">
                 <p style="font-size: 16px;">Ciao <strong>${nome}</strong>, ecco il tuo biglietto!</p>
