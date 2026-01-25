@@ -56,7 +56,7 @@ const getTicketsEmailHtml = (nomeMaster, tickets) => {
         <div class="container">
             <div class="header">
                 <h1>I tuoi Biglietti</h1>
-                <p style="margin: 5px 0 0; opacity: 0.9;">Evento: Presentazione della LorEdo per la Vita</p>
+                <p style="margin: 5px 0 0; opacity: 0.9;">Evento: Ricerca & Sogni - Il futuro inizia ora</p>
             </div>
             <div class="content">
                 <div class="intro">
@@ -68,7 +68,7 @@ const getTicketsEmailHtml = (nomeMaster, tickets) => {
                 
             </div>
             <div class="footer">
-                <p>&copy; ${new Date().getFullYear()} Loredoperlavita. Tutti i diritti riservati.</p>
+                <p>&copy; ${new Date().getFullYear()} <a href="https://www.loredoperlavita.it">www.loredoperlavita.it</a>. Tutti i diritti riservati.</p>
             </div>
         </div>
     </body>
