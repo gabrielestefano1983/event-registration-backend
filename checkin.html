@@ -207,6 +207,74 @@
             }
         }
 
+        /* SEARCH OVERLAY */
+        .search-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f0f2f5;
+            z-index: 40;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .search-overlay.active {
+            display: flex;
+        }
+
+        .search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        .search-results {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .search-item {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            border: 1px solid transparent;
+            text-align: left;
+        }
+
+        .search-item:active {
+            background: #f9f9f9;
+            transform: scale(0.98);
+        }
+
+        .search-item.checked-in {
+            opacity: 0.6;
+            background: #f0f0f0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .search-item.valid {
+            border-left: 4px solid #28a745;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -231,9 +299,11 @@
             <div id="reader"></div>
         </div>
 
-        <div class="controls">
+        <div class="controls" style="flex-direction: column; gap: 15px; align-items: center;">
             <!-- Stop button only if really needed, simplified UI means less buttons -->
             <button onclick="toggleCamera()" id="btnAction" class="btn-large">Stop Camera</button>
+            <button onclick="openSearch()" class="btn-large"
+                style="background: white; color: #007bff; border-color: #007bff;">🔍 Cerca Manuale</button>
         </div>
     </div>
 
@@ -244,6 +314,21 @@
         </div>
         <button onclick="resetScanner()" class="btn-large btn-primary"
             style="margin-top: 30px; width: 100%; max-width: 320px;">Scansiona Prossimo</button>
+    </div>
+
+    <!-- SEARCH OVERLAY -->
+    <div id="view-search" class="search-overlay">
+        <div class="search-header">
+            <h2 style="margin:0;">Cerca Partecipante</h2>
+            <button onclick="closeSearch()"
+                style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
+        </div>
+        <input type="text" id="search-input" class="search-input" placeholder="Nome o Email (min 3 car.)"
+            onkeyup="if(event.key === 'Enter') doSearch()">
+        <button onclick="doSearch()" class="btn-large btn-primary"
+            style="width:100%; margin-bottom: 20px;">CERCA</button>
+
+        <div id="search-results" class="search-results"></div>
     </div>
 
     <!-- LOADING OVERLAY -->
@@ -406,6 +491,69 @@
             card.className = `result-card ${statusClass}`;
             card.innerHTML = html;
             openOverlay('view-result');
+        }
+
+        // --- SEARCH MANUAL FUNCTIONS ---
+        function openSearch() {
+            if (isScanning) stopScanner(); // Stop camera to save resources
+            document.getElementById('view-search').classList.add('active');
+            document.getElementById('search-input').focus();
+        }
+
+        function closeSearch() {
+            document.getElementById('view-search').classList.remove('active');
+            // Opzionale: riavvia scanner se era attivo? Meglio lasciare l'utente decidere
+        }
+
+        async function doSearch() {
+            const query = document.getElementById('search-input').value.trim();
+            const list = document.getElementById('search-results');
+
+            if (query.length < 3) {
+                alert("Inserisci almeno 3 lettere");
+                return;
+            }
+
+            list.innerHTML = '<div style="text-align:center;">Ricerca in corso...</div>';
+
+            try {
+                const res = await fetch(`/api/checkin?q=${encodeURIComponent(query)}`);
+                const data = await res.json();
+
+                if (res.status !== 200) throw new Error(data.error || "Errore");
+
+                list.innerHTML = '';
+                if (data.length === 0) {
+                    list.innerHTML = '<div style="text-align:center; color:#666;">Nessun risultato</div>';
+                    return;
+                }
+
+                data.forEach(t => {
+                    const item = document.createElement('div');
+                    const statusClass = t.checked_in ? 'checked-in' : 'valid';
+                    const statusLabel = t.checked_in ? '⚠️ GIÀ ENTRATO' : '✅ DA SCANSIONARE';
+
+                    item.className = `search-item ${statusClass}`;
+                    item.onclick = () => selectTicket(t.qr_token);
+                    item.innerHTML = `
+                        <div style="font-weight:bold; font-size:1.1rem;">${t.nome}</div>
+                        <div style="font-size:0.9rem; color:#555;">${t.email}</div>
+                        <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.8rem; font-weight:700;">
+                            <span>${t.tipo_label}</span>
+                            <span style="color:${t.checked_in ? '#d63384' : '#28a745'}">${statusLabel}</span>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+
+            } catch (e) {
+                list.innerHTML = `<div style="text-align:center; color:red;">Errore: ${e.message}</div>`;
+            }
+        }
+
+        function selectTicket(token) {
+            closeSearch();
+            doCheckIn(token);
         }
     </script>
 </body>
