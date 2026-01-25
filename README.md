@@ -6,9 +6,10 @@ Sistema completo di registrazione eventi con pagamenti PayPal, generazione QR co
 
 - ✅ **Registrazione multi-partecipante** - Un capogruppo può registrare più persone
 - 💳 **Pagamenti PayPal** - Integrazione completa con PayPal Checkout API
-- 📧 **Email automatiche** - Invio biglietti con QR code via Resend
-- 🔐 **QR Code univoci** - Generati automaticamente per ogni partecipante
-- ✅ **Sistema check-in** - Validazione QR code all'ingresso evento
+- 📧 **Email automatiche** - Invio biglietti aggregati in un'unica email
+- 🏎️ **Performance** - Processamento parallelo ordini per feedback istantaneo
+- 🔐 **QR Code univoci** - Generati automaticamente e hostati su Supabase Storage
+- ✅ **Sistema check-in** - Validazione QR code con note partecipanti
 - 📊 **Database Supabase** - Storico completo registrazioni e pagamenti
 
 ## 🛠️ Tecnologie
