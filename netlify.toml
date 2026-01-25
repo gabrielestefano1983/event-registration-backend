@@ -1,8 +1,7 @@
 [build]
   functions = "netlify/functions"
-  publish = "."
-  command = "echo 'No build command'"
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF . ../README.md ../task.md ../implementation_plan.md ../walkthrough.md"
+  publish = "public"      # Cartella fittizia (vedi sotto)
+  command = "exit 0"      # Dice a Netlify: "Esci subito, non fare nulla"
 
 [[redirects]]
   from = "/api/*"
