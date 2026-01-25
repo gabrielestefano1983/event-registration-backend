@@ -146,9 +146,17 @@ exports.handler = async (event) => {
                         console.log('Email Sent.');
                         // Update email_inviata for all tickets
                         const tokens = tickets.map(t => t.qrToken);
-                        await supabase.from('registrations')
+                        console.log('Updating email_inviata for tokens:', tokens);
+
+                        const { error: updateError } = await supabase.from('registrations')
                             .update({ email_inviata: true })
                             .in('qr_token', tokens);
+
+                        if (updateError) {
+                            console.error('Error updating email_inviata:', updateError);
+                        } else {
+                            console.log('Database updated: email_inviata = true');
+                        }
                     }
                 } catch (emailError) {
                     console.error('Email Exception:', emailError);
