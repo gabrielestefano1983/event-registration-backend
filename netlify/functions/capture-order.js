@@ -87,7 +87,7 @@ exports.handler = async (event) => {
                 console.log('Sending Email...');
                 try {
                     const emailRes = await resend.emails.send({
-                        from: 'Biglietteria <biglietti@loredoperlavita.it>', // Dominio verificato
+                        from: 'Loredoperlavita <info@loredoperlavita.it>', // Dominio verificato (DKIM ok)
                         to: masterEmail,
                         subject: `Biglietto di ingresso per ${p.nome}`,
                         html: `<div style="text-align:center; font-family:sans-serif;">
