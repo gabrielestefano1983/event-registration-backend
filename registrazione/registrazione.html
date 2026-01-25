@@ -1,0 +1,238 @@
+<div id="event-reg-root"
+    style="max-width: 600px; margin: 20px auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; border: 1px solid #e1e1e1; border-radius: 12px; background: #ffffff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden;">
+
+    <div style="background: #f8f9fa; padding: 25px; border-bottom: 1px solid #eee;">
+        <h2 style="margin: 0; color: #1a1a1a; font-size: 1.6rem; letter-spacing: -0.5px;">Registrazione Evento</h2>
+        <p style="margin: 8px 0 0; color: #666; font-size: 0.95rem; line-height: 1.4;">
+            Il referente (Capogruppo) riceverà tutti i biglietti via email.
+        </p>
+    </div>
+
+    <div style="padding: 25px;">
+
+        <div id="leader-section"
+            style="padding: 20px; border: 2px solid #3182ce; border-radius: 12px; background: #ebf8ff; margin-bottom: 25px;">
+            <span
+                style="font-weight: 800; font-size: 0.75rem; color: #3182ce; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 12px;">
+                🟢 Capogruppo / Referente (Obbligatorio)
+            </span>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+                <input type="text" id="leader-name" placeholder="Nome e Cognome completo"
+                    style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box;">
+
+                <div>
+                    <input type="email" id="leader-email" placeholder="Indirizzo Email per ricevere i biglietti"
+                        style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;">
+                    <div id="email-error"
+                        style="color: #e53e3e; font-size: 0.75rem; margin-top: 5px; display: none; font-weight: 600;">
+                        Inserisci un indirizzo email valido.</div>
+                </div>
+
+                <input type="tel" id="leader-telefono" placeholder="Numero di telefono *" required
+                    style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box;">
+
+                <textarea id="leader-note" placeholder="Note (allergie, esigenze speciali - opzionale)"
+                    style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box; resize:vertical; min-height:60px; font-family:inherit;"></textarea>
+
+                <div
+                    style="font-size: 0.9rem; color: #2c5282; font-weight: 700; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #bee3f8;">
+                    Biglietto: Maggiore 18 anni (€10.00)
+                </div>
+            </div>
+        </div>
+
+        <h4
+            style="margin: 0 0 15px; color: #4a5568; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">
+            Altri Partecipanti</h4>
+
+        <div id="extras-list"></div>
+
+        <button type="button" id="add-btn"
+            style="width: 100%; padding: 14px; margin-top: 10px; background: #fff; border: 2px dashed #cbd5e0; border-radius: 10px; color: #4a5568; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.95rem;">
+            + Aggiungi un altro partecipante
+        </button>
+
+        <div
+            style="margin-top: 30px; padding: 20px; background: #f7fafc; border-radius: 12px; border: 1px solid #edf2f7; text-align: right;">
+            <span
+                style="display: block; color: #718096; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 4px;">Totale
+                da pagare</span>
+            <div id="total-display" style="font-size: 2.5rem; font-weight: 900; color: #2d3748; letter-spacing: -1px;">
+                10.00€</div>
+        </div>
+
+        <div style="margin-top: 25px;">
+            <div id="paypal-button-container" style="min-height: 150px;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-detect locale vs produzione
+    const API_BASE = window.location.hostname === 'localhost'
+        ? 'http://localhost:8888/api'
+        : 'https://event-registration-backend.netlify.app/api';
+
+    const PREZZI = { adulto: 10, ragazzo: 5, minore: 0 };
+
+    // Carica configurazione PayPal dal server in modo sicuro
+    async function loadPayPalSDK() {
+        const configRes = await fetch(`${API_BASE}/config`);
+        const config = await configRes.json();
+
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = `https://www.paypal.com/sdk/js?client-id=${config.paypalClientId}&currency=${config.currency}`;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    // Inizializza l'app dopo aver caricato PayPal SDK
+    loadPayPalSDK().then(() => {
+        initApp();
+    }).catch(err => {
+        console.error('Errore caricamento PayPal SDK:', err);
+        alert('Errore nel caricamento del sistema di pagamento. Riprova più tardi.');
+    });
+
+    function initApp() {
+        // Stato dell'applicazione
+        let leaderData = { nome: '', email: '', telefono: '', note: '', tipo: 'adulto' };
+        let extraParticipants = []; // Solo gli altri
+
+        const extrasListEl = document.getElementById('extras-list');
+        const totalEl = document.getElementById('total-display');
+        const paypalContainer = document.getElementById('paypal-button-container');
+
+        // Utility Validazione Email
+        function validateEmailFormat(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase().trim());
+        }
+
+        // Calcola e aggiorna il totale
+        function updateTotal() {
+            let totale = PREZZI.adulto; // Il leader è sempre 10€
+            extraParticipants.forEach(p => { totale += PREZZI[p.tipo]; });
+            totalEl.innerText = totale.toFixed(2) + '€';
+        }
+
+        // Renderizza solo i partecipanti extra (così non tocchiamo il leader)
+        function renderExtras() {
+            extrasListEl.innerHTML = '';
+            extraParticipants.forEach((p, i) => {
+                const div = document.createElement('div');
+                div.style = "position: relative; margin-bottom: 15px; padding: 15px; border: 1px solid #edf2f7; border-radius: 10px; background: #ffffff;";
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-weight: 700; font-size: 0.7rem; color: #a0aec0; text-transform: uppercase;">Partecipante #${i + 2}</span>
+                        <button type="button" onclick="removeExtra(${i})" style="background:none; border:none; color:#e53e3e; cursor:pointer; font-size:0.7rem; font-weight:700;">RIMUOVI</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                        <input type="text" placeholder="Nome e Cognome" class="ex-nome" data-idx="${i}" value="${p.nome}" style="width:100%; padding:10px; border:1px solid #cbd5e0; border-radius:6px; box-sizing: border-box;">
+                        <select class="ex-tipo" data-idx="${i}" style="width:100%; padding:10px; border:1px solid #cbd5e0; border-radius:6px; background:white; box-sizing: border-box;">
+                            <option value="adulto" ${p.tipo === 'adulto' ? 'selected' : ''}>Maggiore 18 anni (€10.00)</option>
+                            <option value="ragazzo" ${p.tipo === 'ragazzo' ? 'selected' : ''}>Tra 12 e 18 anni (€5.00)</option>
+                            <option value="minore" ${p.tipo === 'minore' ? 'selected' : ''}>Minore 12 anni (Gratis)</option>
+                        </select>
+                        <textarea placeholder="Note (allergie, esigenze speciali - opzionale)" class="ex-note" data-idx="${i}" style="width:100%; padding:10px; border:1px solid #cbd5e0; border-radius:6px; box-sizing: border-box; resize:vertical; min-height:50px; font-family:inherit;">${p.note || ''}</textarea>
+                    </div>
+                `;
+                extrasListEl.appendChild(div);
+            });
+            bindExtraListeners();
+            updateTotal();
+        }
+
+        // Listener per il Leader (fissi, non cambiano mai)
+        const leaderEmailInput = document.getElementById('leader-email');
+        const leaderNameInput = document.getElementById('leader-name');
+        const leaderTelefonoInput = document.getElementById('leader-telefono');
+        const leaderNoteInput = document.getElementById('leader-note');
+
+        leaderNameInput.oninput = (e) => { leaderData.nome = e.target.value; };
+        leaderEmailInput.oninput = (e) => { leaderData.email = e.target.value; };
+        leaderTelefonoInput.oninput = (e) => { leaderData.telefono = e.target.value; };
+        leaderNoteInput.oninput = (e) => { leaderData.note = e.target.value; };
+
+        leaderEmailInput.onblur = (e) => {
+            const val = e.target.value.trim();
+            const errorDiv = document.getElementById('email-error');
+            if (val !== "" && !validateEmailFormat(val)) {
+                e.target.style.borderColor = "#e53e3e";
+                e.target.style.borderWidth = "2px";
+                errorDiv.style.display = "block";
+            } else {
+                e.target.style.borderColor = "#cbd5e0";
+                e.target.style.borderWidth = "1px";
+                errorDiv.style.display = "none";
+            }
+        };
+
+        function bindExtraListeners() {
+            document.querySelectorAll('.ex-nome').forEach(el => {
+                el.oninput = (e) => { extraParticipants[e.target.dataset.idx].nome = e.target.value; };
+            });
+            document.querySelectorAll('.ex-tipo').forEach(el => {
+                el.onchange = (e) => {
+                    extraParticipants[e.target.dataset.idx].tipo = e.target.value;
+                    updateTotal();
+                };
+            });
+            document.querySelectorAll('.ex-note').forEach(el => {
+                el.oninput = (e) => { extraParticipants[e.target.dataset.idx].note = e.target.value; };
+            });
+        }
+
+        window.removeExtra = (i) => { extraParticipants.splice(i, 1); renderExtras(); };
+        document.getElementById('add-btn').onclick = () => {
+            extraParticipants.push({ nome: '', tipo: 'adulto', note: '' });
+            renderExtras();
+        };
+
+        // Unifica i dati per il backend
+        function getFullData() {
+            return [leaderData, ...extraParticipants];
+        }
+
+        function validateAll() {
+            if (!leaderData.nome || !leaderData.email || !validateEmailFormat(leaderData.email)) {
+                alert("Dati Capogruppo mancanti o email non valida!");
+                return false;
+            }
+            if (!leaderData.telefono || leaderData.telefono.trim() === '') {
+                alert("Il numero di telefono del Capogruppo è obbligatorio!");
+                return false;
+            }
+            for (let p of extraParticipants) {
+                if (!p.nome) { alert("Inserisci il nome di tutti i partecipanti extra."); return false; }
+            }
+            return true;
+        }
+
+        // PAYPAL
+        paypal.Buttons({
+            createOrder: async (data, actions) => {
+                if (!validateAll()) return actions.reject();
+                const res = await fetch(`${API_BASE}/create-order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ participants: getFullData() })
+                });
+                const order = await res.json();
+                return order.id;
+            },
+            onApprove: async (data) => {
+                const res = await fetch(`${API_BASE}/capture-order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderID: data.orderID, participants: getFullData() })
+                });
+                if (res.ok) { alert('Successo! Email inviata a ' + leaderData.email); window.location.reload(); }
+            }
+        }).render('#paypal-button-container');
+
+        renderExtras(); // Avvio
+    }
+</script>
