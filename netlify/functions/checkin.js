@@ -7,7 +7,7 @@ exports.handler = async (event) => {
     const { data: ticket, error } = await supabase
         .from('registrations')
         .select('*')
-        .eq('qr_token', 'kk7jb7dyy8mktr2svn')
+        .eq('qr_token', qr_token)
         .single();
 
     if (error || !ticket) return { statusCode: 404, body: JSON.stringify({ message: "Biglietto non trovato!" }) };
@@ -31,7 +31,7 @@ exports.handler = async (event) => {
             checked_in: true,
             checked_in_at: new Date().toISOString()
         })
-        .eq('qr_token', 'kk7jb7dyy8mktr2svn')
+        .eq('qr_token', qr_token)
 
     return {
         statusCode: 200,
