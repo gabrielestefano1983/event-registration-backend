@@ -4,11 +4,7 @@
  * @param {Array} tickets - Array di oggetti { nome, tipo, qrUrl }
  * @returns {string} HTML completo
  */
-const TIPO_LABELS = {
-    'adulto': 'Maggiore 18 anni',
-    'ragazzo': 'Tra 12 e 18 anni',
-    'minore': 'Minore 12 anni'
-};
+const { TIPO_LABELS } = require('./constants');
 
 const getTicketsEmailHtml = (nomeMaster, tickets) => {
     const ticketsHtml = tickets.map(t => `

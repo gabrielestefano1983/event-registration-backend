@@ -1,4 +1,5 @@
 const { supabase } = require('./utils/supabase');
+const { TIPO_LABELS } = require('./utils/constants');
 
 exports.handler = async (event) => {
     const { qr_token } = JSON.parse(event.body);
@@ -18,7 +19,7 @@ exports.handler = async (event) => {
                 message: "Già entrato!",
                 ticket: {
                     nome: ticket.nome,
-                    tipo: ticket.tipo_partecipante,
+                    tipo: TIPO_LABELS[ticket.tipo_partecipante] || ticket.tipo_partecipante,
                     checked_in_at: ticket.checked_in_at,
                     note: ticket.note
                 }
@@ -38,7 +39,7 @@ exports.handler = async (event) => {
         statusCode: 200,
         body: JSON.stringify({
             message: `Benvenuto/a ${ticket.nome}!`,
-            tipo: ticket.tipo_partecipante,
+            tipo: TIPO_LABELS[ticket.tipo_partecipante] || ticket.tipo_partecipante,
             note: ticket.note
         })
     };

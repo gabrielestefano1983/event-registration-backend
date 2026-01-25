@@ -46,7 +46,7 @@
                     <textarea id="leader-note" placeholder="Note (allergie, esigenze speciali - opzionale)"
                         style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box; resize:vertical; min-height:60px; font-family:inherit;"></textarea>
 
-                    <div
+                    <div id="leader-ticket-label"
                         style="font-size: 0.9rem; color: #2c5282; font-weight: 700; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #bee3f8;">
                         Biglietto: Maggiore 18 anni (€10.00)
                     </div>
@@ -92,6 +92,7 @@
         async function loadPayPalSDK() {
             const configRes = await fetch(`${API_BASE}/config`);
             const config = await configRes.json();
+            window.evtConfig = config; // Store config globally for labels
 
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -138,13 +139,37 @@
                 totalEl.innerText = totale.toFixed(2) + '€';
             }
 
+            // Aggiorna etichetta capogruppo (solo visiva)
+            if (window.evtConfig && window.evtConfig.tipoLabels) {
+                const lLabel = window.evtConfig.tipoLabels['adulto'] || 'Maggiore 18 anni';
+                const lPrice = PREZZI.adulto.toFixed(2);
+                const el = document.getElementById('leader-ticket-label');
+                if (el) el.innerText = `Biglietto: ${lLabel} (€${lPrice})`;
+            }
+
             // Renderizza solo i partecipanti extra (così non tocchiamo il leader)
             function renderExtras() {
                 extrasListEl.innerHTML = '';
+                const labels = window.evtConfig && window.evtConfig.tipoLabels ? window.evtConfig.tipoLabels : {
+                    'adulto': 'Maggiore 18 anni',
+                    'ragazzo': 'Tra 12 e 18 anni',
+                    'minore': 'Minore 12 anni'
+                };
+
                 extraParticipants.forEach((p, i) => {
                     const div = document.createElement('div');
                     // Stile "Card" simile al Capogruppo ma con colori neutri/distinti
                     div.style = "position: relative; margin-bottom: 20px; padding: 20px; border: 2px solid #cbd5e0; border-radius: 12px; background: #fff;";
+
+                    // Genera opzioni dinamicamente
+                    const optionsHtml = Object.keys(PREZZI).map(k => {
+                        const label = labels[k] || k;
+                        // const price = PREZZI[k] === 0 ? 'Gratis' : `€${PREZZI[k].toFixed(2)}`;
+                        // Nota: Il prompt chiedeva "faccia vedere in realtà la frase". Mantengo anche il prezzo per chiarezza UI?
+                        // L'originale aveva (€10.00). Userò lo stesso formato.
+                        const price = PREZZI[k] === 0 ? 'Gratis' : `€${PREZZI[k].toFixed(2)}`;
+                        return `<option value="${k}" ${p.tipo === k ? 'selected' : ''}>${label} (${price})</option>`;
+                    }).join('');
 
                     div.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -162,9 +187,7 @@
                         
                         <select class="ex-tipo" data-idx="${i}" 
                             style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; background:white; font-size:1rem; box-sizing: border-box;">
-                            <option value="adulto" ${p.tipo === 'adulto' ? 'selected' : ''}>Maggiore 18 anni (€10.00)</option>
-                            <option value="ragazzo" ${p.tipo === 'ragazzo' ? 'selected' : ''}>Tra 12 e 18 anni (€5.00)</option>
-                            <option value="minore" ${p.tipo === 'minore' ? 'selected' : ''}>Minore 12 anni (Gratis)</option>
+                            ${optionsHtml}
                         </select>
                         
                         <textarea placeholder="Note (allergie, esigenze speciali - opzionale)" class="ex-note" data-idx="${i}" 
