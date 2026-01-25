@@ -207,13 +207,8 @@
                 body: JSON.stringify({ orderID: data.orderID, participants: getFullData() })
             });
             if (res.ok) {
-                // Se siamo in iframe, mostra messaggio, altrimenti redirect
-                if (window.self !== window.top) {
-                    alert('✅ Registrazione completata! Riceverai i biglietti via email a: ' + leaderData.email);
-                    window.location.reload();
-                } else {
-                    window.location.href = `/registrazione/success.html?email=${encodeURIComponent(leaderData.email)}`;
-                }
+                // Redirect alla success page
+                window.location.href = `/registrazione/success.html?email=${encodeURIComponent(leaderData.email)}`;
             } else {
                 alert('Si è verificato un errore. Contattaci se il problema persiste.');
             }
