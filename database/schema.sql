@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS registrations (
   importo_pagato DECIMAL(10,2) DEFAULT 0.00,
   pagato BOOLEAN DEFAULT false,
   paypal_order_id TEXT,
-  numero_ordine_gruppo INTEGER,
+  numero_ordine_gruppo BIGINT,
   qr_token TEXT UNIQUE NOT NULL,
   checked_in BOOLEAN DEFAULT false,
   checked_in_at TIMESTAMP WITH TIME ZONE,
