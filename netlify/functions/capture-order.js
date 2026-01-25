@@ -87,7 +87,7 @@ exports.handler = async (event) => {
                 console.log('Sending Email...');
                 try {
                     const emailRes = await resend.emails.send({
-                        from: 'onboarding@resend.dev', // Dominio di test obbligatorio se non hai dominio verificato
+                        from: 'Biglietteria <biglietti@loredoperlavita.it>', // Dominio verificato
                         to: masterEmail,
                         subject: `Biglietto di ingresso per ${p.nome}`,
                         html: `<div style="text-align:center; font-family:sans-serif;">
