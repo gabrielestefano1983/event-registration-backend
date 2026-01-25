@@ -108,7 +108,9 @@ exports.handler = async (event) => {
                             nome: p.nome,
                             tipo: p.tipo,
                             qrUrl: qrDataUrl,
-                            qrToken: qrToken
+                            qrToken: qrToken,
+                            note: p.note,
+                            importo: importo
                         }
                     };
 

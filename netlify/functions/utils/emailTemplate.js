@@ -13,11 +13,21 @@ const getTicketsEmailHtml = (nomeMaster, tickets) => {
                 
                 <span class="label" style="font-size: 12px; color: #718096; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; display: block;">Tipologia Biglietto</span>
                 <span class="value" style="font-size: 16px; color: #4a5568; text-transform: capitalize; margin-bottom: 0;">${t.tipo}</span>
+                
+                ${t.note ? `
+                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
+                    <span class="label" style="font-size: 12px; color: #d63384; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; display: block;">Note</span>
+                    <span class="value" style="font-size: 14px; color: #2d3748;">${t.note}</span>
+                </div>` : ''}
+
+                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
+                     <span class="label" style="font-size: 12px; color: #718096; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; display: block;">Prezzo</span>
+                     <span class="value" style="font-size: 16px; color: #2d3748; font-weight: bold;">€${t.importo.toFixed(2)}</span>
+                </div>
             </div>
 
             <div class="qr-container" style="text-align: center; margin-top: 20px;">
                 <img src="${t.qrUrl}" width="200" height="200" alt="QR Code per ${t.nome}" style="display: inline-block;" />
-                <p style="color: #666; font-size: 12px; margin-top: 10px;">Token: ${t.qrToken}</p>
             </div>
         </div>
     `).join('');
