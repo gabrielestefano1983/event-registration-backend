@@ -555,6 +555,10 @@
         function selectTicket(token, name, email) {
             // Conferma esplicita prima di procedere
             if (confirm(`Confermi il Check-in manuale per:\n\n👤 ${name}\n📧 ${email}?`)) {
+                // Pulisci i campi per il prossimo utilizzo
+                document.getElementById('search-input').value = '';
+                document.getElementById('search-results').innerHTML = '';
+
                 closeSearch();
                 doCheckIn(token);
             }
