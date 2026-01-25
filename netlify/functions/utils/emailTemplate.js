@@ -1,11 +1,27 @@
 /**
- * Genera il template HTML per il biglietto
- * @param {string} nomeNome - Nome del partecipante
- * @param {string} tipoBiglietto - Tipo di biglietto (adulto/ragazzo/minore/test)
- * @param {string} qrUrl - URL dell'immagine QR Code
+ * Genera il template HTML per i biglietti
+ * @param {string} nomeMaster - Nome del capogruppo
+ * @param {Array} tickets - Array di oggetti { nome, tipo, qrUrl }
  * @returns {string} HTML completo
  */
-const getTicketEmailHtml = (nome, tipoBiglietto, qrUrl) => {
+const getTicketsEmailHtml = (nomeMaster, tickets) => {
+    const ticketsHtml = tickets.map(t => `
+        <div class="ticket-card" style="border: 2px dashed #cbd5e0; border-radius: 12px; padding: 20px; margin-bottom: 30px; background: #fff;">
+            <div class="ticket-info">
+                <span class="label" style="font-size: 12px; color: #718096; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; display: block;">Partecipante</span>
+                <span class="value" style="font-size: 18px; font-weight: bold; color: #2d3748; margin-bottom: 15px; display: block;">${t.nome}</span>
+                
+                <span class="label" style="font-size: 12px; color: #718096; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; display: block;">Tipologia Biglietto</span>
+                <span class="value" style="font-size: 16px; color: #4a5568; text-transform: capitalize; margin-bottom: 0;">${t.tipo}</span>
+            </div>
+
+            <div class="qr-container" style="text-align: center; margin-top: 20px;">
+                <img src="${t.qrUrl}" width="200" height="200" alt="QR Code per ${t.nome}" style="display: inline-block;" />
+                <p style="color: #666; font-size: 12px; margin-top: 10px;">Token: ${t.qrToken}</p>
+            </div>
+        </div>
+    `).join('');
+
     return `
     <!DOCTYPE html>
     <html>
@@ -15,36 +31,25 @@ const getTicketEmailHtml = (nome, tipoBiglietto, qrUrl) => {
             .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
             .header { background: #2c5282; color: #ffffff; padding: 30px 20px; text-align: center; }
             .header h1 { margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
-            .content { padding: 30px; text-align: center; }
-            .ticket-info { background: #edf2f7; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: left; }
-            .label { font-size: 12px; color: #718096; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; display: block; }
-            .value { font-size: 18px; font-weight: bold; color: #2d3748; margin-bottom: 15px; display: block; }
-            .qr-container { margin: 30px 0; padding: 20px; border: 2px dashed #cbd5e0; border-radius: 12px; display: inline-block; }
+            .content { padding: 30px; }
+            .intro { text-align: center; margin-bottom: 30px; }
             .footer { background: #f7fafc; padding: 20px; text-align: center; font-size: 12px; color: #a0aec0; border-top: 1px solid #edf2f7; }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
-                <h1>Il tuo Biglietto</h1>
+                <h1>I tuoi Biglietti</h1>
                 <p style="margin: 5px 0 0; opacity: 0.9;">Evento: Presentazione della LorEdo per la Vita</p>
             </div>
             <div class="content">
-                <p style="font-size: 16px;">Ciao <strong>${nome}</strong>, ecco il tuo biglietto!</p>
-                
-                <div class="ticket-info">
-                    <span class="label">Partecipante</span>
-                    <span class="value">${nome}</span>
-                    
-                    <span class="label">Tipologia Biglietto</span>
-                    <span class="value" style="text-transform: capitalize; margin-bottom: 0;">${tipoBiglietto}</span>
-                </div>
-
-                <div class="qr-container">
-                    <img src="${qrUrl}" width="200" height="200" alt="QR Code Biglietto" style="display: block;" />
+                <div class="intro">
+                    <p style="font-size: 16px;">Ciao <strong>${nomeMaster}</strong>,</p>
+                    <p>Ecco i biglietti per te e il tuo gruppo. Mostra i QR Code all'ingresso.</p>
                 </div>
                 
-                <p style="color: #666; font-size: 14px;">Mostra questo QR Code all'ingresso direttamente dal tuo smartphone.</p>
+                ${ticketsHtml}
+                
             </div>
             <div class="footer">
                 <p>&copy; ${new Date().getFullYear()} Loredoperlavita. Tutti i diritti riservati.</p>
@@ -54,4 +59,4 @@ const getTicketEmailHtml = (nome, tipoBiglietto, qrUrl) => {
     </html>`;
 };
 
-module.exports = { getTicketEmailHtml };
+module.exports = { getTicketsEmailHtml };

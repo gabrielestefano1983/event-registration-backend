@@ -19,7 +19,8 @@ exports.handler = async (event) => {
                 ticket: {
                     nome: ticket.nome,
                     tipo: ticket.tipo_partecipante,
-                    checked_in_at: ticket.checked_in_at
+                    checked_in_at: ticket.checked_in_at,
+                    note: ticket.note
                 }
             })
         };
@@ -35,6 +36,10 @@ exports.handler = async (event) => {
 
     return {
         statusCode: 200,
-        body: JSON.stringify({ message: `Benvenuto/a ${ticket.nome}!`, tipo: ticket.tipo_partecipante })
+        body: JSON.stringify({
+            message: `Benvenuto/a ${ticket.nome}!`,
+            tipo: ticket.tipo_partecipante,
+            note: ticket.note
+        })
     };
 };

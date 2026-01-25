@@ -355,6 +355,12 @@
                     <div class="detail-text">${data.message.replace('Benvenuto/a ', '')}</div>
                     <div class="sub-detail">${data.tipo ? data.tipo.toUpperCase() : ''}</div>
                 `;
+
+                // Mostra note se presenti
+                if (data.note) {
+                    html += `<div class="sub-detail" style="color: #d63384; margin-top: 15px; font-weight: bold; border-top: 1px solid #eee; padding-top: 10px; width: 100%;">📝 NOTE: ${data.note}</div>`;
+                }
+
             } else if (status === 400) {
                 statusClass = 'status-warn';
 
@@ -366,6 +372,11 @@
                         <div class="detail-text" style="font-size: 18px;">${data.ticket.nome}</div>
                         <div class="sub-detail" style="color: #856404;">Entrato alle <strong>${timeStr}</strong></div>
                     `;
+
+                    // Mostra note anche qui se servono
+                    if (data.ticket.note) {
+                        detailHtml += `<div class="sub-detail" style="color: #d63384; margin-top: 10px; font-weight: bold;">📝 NOTE: ${data.ticket.note}</div>`;
+                    }
                 }
 
                 html = `

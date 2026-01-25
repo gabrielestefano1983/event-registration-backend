@@ -1,7 +1,7 @@
 const { supabase } = require('./utils/supabase');
 const { Resend } = require('resend');
 const QRCode = require('qrcode');
-const { getTicketEmailHtml } = require('./utils/emailTemplate');
+const { getTicketsEmailHtml } = require('./utils/emailTemplate');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const PAYPAL_API = 'https://api-m.sandbox.paypal.com';
@@ -47,96 +47,109 @@ exports.handler = async (event) => {
         console.log('Capture Status:', captureData.status);
 
         if (captureData.status === 'COMPLETED' || captureData.status === 'APPROVED') {
-            // 3. Ciclo sui partecipanti per DB e Email
-            console.log('3. Processing Participants...');
+            // 3. Elaborazione Parallela Partecipanti
+            console.log('3. Processing Participants (Parallel)...');
             const listino = { adulto: 10.00, ragazzo: 5.00, minore: 0.00 };
             const numeroGruppo = Date.now();
 
-            const results = [];
-
-            for (const p of participants) {
-                console.log(`Processing ${p.nome}...`);
-                const qrToken = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-                console.log(`[DEBUG] Generated QR Token for ${p.nome}: ${qrToken}`);
-
-                // Generate QR Buffer
-                const qrBuffer = await QRCode.toBuffer(qrToken);
-
-                // Upload QR to Supabase Storage
-                const fileName = `qr-${qrToken}.png`;
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('qr-codes')
-                    .upload(fileName, qrBuffer, {
-                        contentType: 'image/png',
-                        upsert: true
-                    });
-
-                let qrDataUrl;
-                if (uploadError) {
-                    console.error('Supabase Storage Upload Error:', uploadError);
-                    // Fallback to Data URL if upload fails, though this might trigger the warning again
-                    qrDataUrl = await QRCode.toDataURL(qrToken);
-                } else {
-                    const { data: publicUrlData } = supabase.storage
-                        .from('qr-codes')
-                        .getPublicUrl(fileName);
-                    qrDataUrl = publicUrlData.publicUrl;
-                    console.log(`QR Uploaded to: ${qrDataUrl}`);
-                }
-
-                const importo = listino[p.tipo] || 0.00;
-
-                // Salvataggio Supabase
-                console.log('Saving to DB...');
-                const dbRes = await supabase.from('registrations').insert([{
-                    nome: p.nome,
-                    email: p.email || masterEmail,
-                    telefono: p.telefono || masterTelefono,
-                    tipo_partecipante: p.tipo,
-                    importo_pagato: importo,
-                    pagato: true,
-                    paypal_order_id: orderID,
-                    numero_ordine_gruppo: numeroGruppo,
-                    qr_token: qrToken,
-                    note: p.note || null,
-                    email_inviata: false
-                }]);
-
-                if (dbRes.error) {
-                    console.error('Supabase Error:', dbRes.error);
-                    // Non blocchiamo tutto, continuiamo con email se possibile
-                    results.push({ name: p.nome, status: 'db_error', error: dbRes.error });
-                } else {
-                    console.log('DB Saved.');
-                }
-
-                // Invio Email singola
-                console.log('Sending Email...');
+            // Creiamo un array di PROMESSE (operazioni che partono insieme)
+            const tasks = participants.map(async (p) => {
                 try {
-                    const emailHtml = getTicketEmailHtml(p.nome, p.tipo, qrDataUrl);
+                    console.log(`Starting process for ${p.nome}...`);
+                    const qrToken = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+
+                    // A. Generazione QR (CPU bound, ma veloce)
+                    const qrBuffer = await QRCode.toBuffer(qrToken);
+
+                    // B. Upload Storage (Network IO)
+                    const fileName = `qr-${qrToken}.png`;
+                    const { error: uploadError } = await supabase.storage
+                        .from('qr-codes')
+                        .upload(fileName, qrBuffer, {
+                            contentType: 'image/png',
+                            upsert: true
+                        });
+
+                    let qrDataUrl;
+                    if (uploadError) {
+                        console.error(`[${p.nome}] Upload Error:`, uploadError);
+                        qrDataUrl = await QRCode.toDataURL(qrToken); // Fallback
+                    } else {
+                        const { data: publicUrlData } = supabase.storage
+                            .from('qr-codes')
+                            .getPublicUrl(fileName);
+                        qrDataUrl = publicUrlData.publicUrl;
+                    }
+
+                    // C. Salvataggio DB (Network IO)
+                    const importo = listino[p.tipo] || 0.00;
+                    const { error: dbError } = await supabase.from('registrations').insert([{
+                        nome: p.nome,
+                        email: p.email || masterEmail,
+                        telefono: p.telefono || masterTelefono,
+                        tipo_partecipante: p.tipo,
+                        importo_pagato: importo,
+                        pagato: true,
+                        paypal_order_id: orderID,
+                        numero_ordine_gruppo: numeroGruppo,
+                        qr_token: qrToken,
+                        note: p.note || null,
+                        email_inviata: false
+                    }]);
+
+                    if (dbError) {
+                        console.error(`[${p.nome}] DB Error:`, dbError);
+                        return { status: 'error', error: dbError, name: p.nome };
+                    }
+
+                    return {
+                        status: 'ok',
+                        ticket: {
+                            nome: p.nome,
+                            tipo: p.tipo,
+                            qrUrl: qrDataUrl,
+                            qrToken: qrToken
+                        }
+                    };
+
+                } catch (err) {
+                    console.error(`[${p.nome}] Exception:`, err);
+                    return { status: 'error', error: err.message, name: p.nome };
+                }
+            });
+
+            // Attendiamo che TUTTI finiscano
+            const resultsRaw = await Promise.all(tasks);
+
+            // Filtriamo i risultati
+            const results = resultsRaw.map(r => ({ name: r.name, status: r.status, error: r.error }));
+            const tickets = resultsRaw.filter(r => r.status === 'ok').map(r => r.ticket);
+
+            // Send Single Email
+            if (tickets.length > 0) {
+                console.log(`Sending single email with ${tickets.length} tickets to ${masterEmail}...`);
+                try {
+                    const emailHtml = getTicketsEmailHtml(participants[0].nome, tickets);
 
                     const emailRes = await resend.emails.send({
-                        from: 'Loredoperlavita <info@loredoperlavita.it>', // Dominio verificato
+                        from: 'Loredoperlavita <info@loredoperlavita.it>',
                         to: masterEmail,
-                        subject: `Biglietto di ingresso per ${p.nome}`,
+                        subject: `I tuoi biglietti per l'evento (${tickets.length})`,
                         html: emailHtml
                     });
 
                     if (emailRes.error) {
                         console.error('Resend API Error:', emailRes.error);
-                        results.push({ name: p.nome, status: 'email_error', error: emailRes.error });
                     } else {
                         console.log('Email Sent.');
-                        // Aggiorna flag email_inviata
+                        // Update email_inviata for all tickets
+                        const tokens = tickets.map(t => t.qrToken);
                         await supabase.from('registrations')
                             .update({ email_inviata: true })
-                            .eq('qr_token', qrToken);
-                        results.push({ name: p.nome, status: 'ok' });
+                            .in('qr_token', tokens);
                     }
-
                 } catch (emailError) {
                     console.error('Email Exception:', emailError);
-                    results.push({ name: p.nome, status: 'email_exception', error: emailError.message });
                 }
             }
             console.log('--- END CAPTURE ORDER ---');
