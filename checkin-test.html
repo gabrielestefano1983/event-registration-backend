@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Check-in Scanner (Simulazione)</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         body {
             font-family: sans-serif;
@@ -28,10 +29,20 @@
             color: white;
             border: none;
             cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
         }
 
         button:hover {
             background: #218838;
+        }
+
+        #reader {
+            width: 100%;
+            border: 1px solid #ccc;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         #result {
@@ -60,24 +71,74 @@
 
 <body>
     <h1>Staff Check-in Panel</h1>
-    <p>Inserisci il token letto dal QR Code (o copialo dalla console/db)</p>
 
-    <input type="text" id="tokenInput" placeholder="Incolla qui il QR Token" />
+    <div id="reader"></div>
+    <button onclick="startScanner()" id="btnStart">📷 Attiva Fotocamera</button>
+    <button onclick="stopScanner()" id="btnStop" style="display:none; background:#dc3545;">Stop Camera</button>
+
+    <p style="margin-top: 20px;">Oppure inserimento manuale:</p>
+    <input type="text" id="tokenInput" placeholder="Incolla QR Token" />
     <br>
-    <button onclick="checkIn()">✅ Valida Biglietto</button>
+    <button onclick="checkInManual()">✅ Valida Manualmente</button>
 
     <div id="result">In attesa...</div>
 
     <script>
-        async function checkIn() {
+        let html5QrcodeScanner;
+
+        function checkInManual() {
             const token = document.getElementById('tokenInput').value.trim();
-            const resultDiv = document.getElementById('result');
+            if (!token) { alert("Inserisci un token!"); return; }
+            doCheckIn(token);
+        }
 
-            if (!token) {
-                alert("Inserisci un token!");
-                return;
+        async function onScanSuccess(decodedText, decodedResult) {
+            // Ferma lo scanner dopo il successo per evitare scansioni multiple
+            // await stopScanner(); 
+            // Oppure continua, ma gestisci il debounce. Per ora lo fermo è più chiaro.
+            console.log(`Code matched = ${decodedText}`, decodedResult);
+
+            // Il QR code nel biglietto è l'URL completo dell'immagine o solo il token?
+            // Nel codice backend create-order.js: const qrToken = ...
+            // MA il QR contiene solo il Token se usiamo QRCode.toDataURL(qrToken)? 
+            // Verifica: QRCode.toDataURL(qrToken) crea un'immagine che CODIFICA il testo del token. Corretto.
+
+            // Se decodedText è un URL completo (es scansione da altra app), puliscilo se serve.
+            // Ma noi abbiamo generato: QRCode.toDataURL(qrToken). Quindi il contenuto è ESATTAMENTE il token.
+
+            // Feedback visivo immediato
+            document.getElementById('tokenInput').value = decodedText;
+            doCheckIn(decodedText);
+        }
+
+        function onScanFailure(error) {
+            // handle scan failure, usually better to ignore and keep scanning.
+            // for example:
+            // console.warn(`Code scan error = ${error}`);
+        }
+
+        function startScanner() {
+            document.getElementById('btnStart').style.display = 'none';
+            document.getElementById('btnStop').style.display = 'inline-block';
+
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+            // Preferenza fotocamera posteriore
+            html5QrcodeScanner.start({ facingMode: "environment" }, config, onScanSuccess);
+        }
+
+        async function stopScanner() {
+            if (html5QrcodeScanner) {
+                await html5QrcodeScanner.stop();
+                html5QrcodeScanner = null;
             }
+            document.getElementById('btnStart').style.display = 'inline-block';
+            document.getElementById('btnStop').style.display = 'none';
+        }
 
+        async function doCheckIn(token) {
+            const resultDiv = document.getElementById('result');
             resultDiv.innerText = "Verifica in corso...";
             resultDiv.className = "";
 
@@ -93,6 +154,7 @@
                 if (response.ok) {
                     resultDiv.innerHTML = `🎉 OK: ${data.message} <br> Tipo: ${data.tipo}`;
                     resultDiv.className = "success";
+                    // Play beep sound option here?
                 } else {
                     resultDiv.innerText = `⛔ ERRORE: ${data.message}`;
                     if (response.status === 400) resultDiv.className = "warning"; // Già entrato
