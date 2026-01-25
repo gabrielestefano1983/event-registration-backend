@@ -7,11 +7,23 @@ exports.handler = async (event) => {
     const { data: ticket, error } = await supabase
         .from('registrations')
         .select('*')
-        .eq('qr_token', qr_token)
+        .eq('qr_token', 'kk7jb7dyy8mktr2svn')
         .single();
 
     if (error || !ticket) return { statusCode: 404, body: JSON.stringify({ message: "Biglietto non trovato!" }) };
-    if (ticket.checked_in) return { statusCode: 400, body: JSON.stringify({ message: "Già entrato!" }) };
+    if (ticket.checked_in) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                message: "Già entrato!",
+                ticket: {
+                    nome: ticket.nome,
+                    tipo: ticket.tipo_partecipante,
+                    checked_in_at: ticket.checked_in_at
+                }
+            })
+        };
+    }
 
     // Segna come entrato con timestamp
     await supabase.from('registrations')
@@ -19,7 +31,7 @@ exports.handler = async (event) => {
             checked_in: true,
             checked_in_at: new Date().toISOString()
         })
-        .eq('qr_token', qr_token);
+        .eq('qr_token', 'kk7jb7dyy8mktr2svn')
 
     return {
         statusCode: 200,

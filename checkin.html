@@ -357,10 +357,21 @@
                 `;
             } else if (status === 400) {
                 statusClass = 'status-warn';
+
+                let detailHtml = '<div class="detail-text">Usato in precedenza</div>';
+                if (data.ticket) {
+                    const date = new Date(data.ticket.checked_in_at);
+                    const timeStr = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                    detailHtml = `
+                        <div class="detail-text" style="font-size: 18px;">${data.ticket.nome}</div>
+                        <div class="sub-detail" style="color: #856404;">Entrato alle <strong>${timeStr}</strong></div>
+                    `;
+                }
+
                 html = `
                     <span class="icon">⚠️</span>
                     <span class="status-text">GIÀ ENTRATO</span>
-                    <div class="detail-text">Usato in precedenza</div>
+                    ${detailHtml}
                 `;
             } else {
                 statusClass = 'status-ko';
