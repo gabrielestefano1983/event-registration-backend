@@ -1,6 +1,6 @@
 [build]
   functions = "netlify/functions"
-  publish = "public"      # Cartella fittizia (vedi sotto)
+  publish = "."      # Usa la root per servire checkin.html e registrazione/
   command = "exit 0"      # Dice a Netlify: "Esci subito, non fare nulla"
 
 [[redirects]]
