@@ -104,6 +104,7 @@
 
         // Inizializza l'app dopo aver caricato PayPal SDK
         loadPayPalSDK().then(() => {
+            window.scrollTo(0, 0); // Force scroll to top
             initApp();
         }).catch(err => {
             console.error('Errore caricamento PayPal SDK:', err);
