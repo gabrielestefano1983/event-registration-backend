@@ -4,6 +4,12 @@
  * @param {Array} tickets - Array di oggetti { nome, tipo, qrUrl }
  * @returns {string} HTML completo
  */
+const TIPO_LABELS = {
+    'adulto': 'Maggiore 18 anni',
+    'ragazzo': 'Tra 12 e 18 anni',
+    'minore': 'Minore 12 anni'
+};
+
 const getTicketsEmailHtml = (nomeMaster, tickets) => {
     const ticketsHtml = tickets.map(t => `
         <div class="ticket-card" style="border: 2px dashed #cbd5e0; border-radius: 12px; padding: 20px; margin-bottom: 30px; background: #fff;">
@@ -12,7 +18,7 @@ const getTicketsEmailHtml = (nomeMaster, tickets) => {
                 <span class="value" style="font-size: 18px; font-weight: bold; color: #2d3748; margin-bottom: 15px; display: block;">${t.nome}</span>
                 
                 <span class="label" style="font-size: 12px; color: #718096; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; display: block;">Tipologia Biglietto</span>
-                <span class="value" style="font-size: 16px; color: #4a5568; text-transform: capitalize; margin-bottom: 0;">${t.tipo}</span>
+                <span class="value" style="font-size: 16px; color: #4a5568; text-transform: capitalize; margin-bottom: 0;">${TIPO_LABELS[t.tipo] || t.tipo}</span>
                 
                 ${t.note ? `
                 <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
