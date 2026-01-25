@@ -4,87 +4,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Check-in Scanner (Simulazione)</title>
+    <title>Staff Check-in Scanner</title>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 600px;
-            margin: 2rem auto;
+            margin: 0 auto;
+            background: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            background: #fff;
             padding: 1rem;
             text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        /* MAIN VIEWS */
+        .view {
+            flex: 1;
+            padding: 1rem;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view.active {
+            display: flex;
+        }
+
+        /* SCANNER VIEW */
+        #reader {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 20px;
+        }
+
+        .btn-large {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 80%;
+            max-width: 300px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s;
+        }
+
+        .btn-large:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+            margin-top: 20px;
+        }
+
+        /* RESULT VIEW */
+        .result-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 350px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .status-text {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .detail-text {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .sub-detail {
+            font-size: 14px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* COLORS */
+        .status-ok .icon {
+            color: #28a745;
+        }
+
+        .status-ok .status-text {
+            color: #28a745;
+        }
+
+        .status-ko .icon {
+            color: #dc3545;
+        }
+
+        .status-ko .status-text {
+            color: #dc3545;
+        }
+
+        .status-warn .icon {
+            color: #ffc107;
+        }
+
+        .status-warn .status-text {
+            color: #d39e00;
+        }
+
+        /* Manual Input */
+        .manual-input {
+            margin-top: 30px;
+            width: 100%;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
         }
 
         input {
-            font-size: 1.2rem;
             padding: 10px;
-            width: 80%;
-            margin-bottom: 1rem;
-        }
-
-        button {
-            font-size: 1.2rem;
-            padding: 10px 20px;
-            background: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
             border-radius: 5px;
-            margin: 5px;
-        }
-
-        button:hover {
-            background: #218838;
-        }
-
-        #reader {
-            width: 100%;
             border: 1px solid #ccc;
-            margin-bottom: 1rem;
-            border-radius: 8px;
-            overflow: hidden;
+            width: 60%;
         }
 
-        #result {
-            margin-top: 2rem;
-            padding: 1rem;
-            border-radius: 8px;
-            font-weight: bold;
-        }
+        @keyframes popIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
 
-        .success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .warning {
-            background: #fff3cd;
-            color: #856404;
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
     </style>
 </head>
 
 <body>
-    <h1>Staff Check-in Panel</h1>
 
-    <div id="reader"></div>
-    <button onclick="startScanner()" id="btnStart">📷 Attiva Fotocamera</button>
-    <button onclick="stopScanner()" id="btnStop" style="display:none; background:#dc3545;">Stop Camera</button>
+    <header>
+        <h1>Staff Check-in</h1>
+    </header>
 
-    <p style="margin-top: 20px;">Oppure inserimento manuale:</p>
-    <input type="text" id="tokenInput" placeholder="Incolla QR Token" />
-    <br>
-    <button onclick="checkInManual()">✅ Valida Manualmente</button>
+    <!-- VIEW 1: SCANNER -->
+    <div id="view-scan" class="view active">
+        <div id="reader"></div>
 
-    <div id="result">In attesa...</div>
+        <button onclick="startScanner()" id="btnStart" class="btn-large btn-primary">📷 Scansiona QR</button>
+        <button onclick="stopScanner()" id="btnStop" class="btn-large btn-danger" style="display:none;">Stop</button>
+
+        <div class="manual-input">
+            <p style="font-size: 0.9rem; color: #666;">Oppure inserisci codice manuale:</p>
+            <input type="text" id="tokenInput" placeholder="QR Token..." />
+            <button onclick="checkInManual()" style="padding: 10px; cursor: pointer;">OK</button>
+        </div>
+    </div>
+
+    <!-- VIEW 2: RESULT -->
+    <div id="view-result" class="view">
+        <div id="result-card" class="result-card">
+            <!-- Content filled by JS -->
+        </div>
+        <button onclick="resetScanner()" class="btn-large btn-primary" style="margin-top: 30px;">Scansiona
+            Prossimo</button>
+    </div>
+
+    <!-- VIEW 3: LOADING -->
+    <div id="view-loading" class="view">
+        <div class="result-card">
+            <span class="icon">⏳</span>
+            <span class="status-text" style="color:#666">Verifica in corso...</span>
+        </div>
+    </div>
 
     <script>
         let html5QrcodeScanner;
+        let isScanning = false;
+
+        // UI SWITCHING
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
 
         function checkInManual() {
             const token = document.getElementById('tokenInput').value.trim();
@@ -92,55 +236,57 @@
             doCheckIn(token);
         }
 
+        // SCANNER LOGIC
         async function onScanSuccess(decodedText, decodedResult) {
-            // Ferma lo scanner dopo il successo per evitare scansioni multiple
-            // await stopScanner(); 
-            // Oppure continua, ma gestisci il debounce. Per ora lo fermo è più chiaro.
-            console.log(`Code matched = ${decodedText}`, decodedResult);
+            if (!isScanning) return;
+            isScanning = false;
 
-            // Il QR code nel biglietto è l'URL completo dell'immagine o solo il token?
-            // Nel codice backend create-order.js: const qrToken = ...
-            // MA il QR contiene solo il Token se usiamo QRCode.toDataURL(qrToken)? 
-            // Verifica: QRCode.toDataURL(qrToken) crea un'immagine che CODIFICA il testo del token. Corretto.
+            // Stop noise/feedback loop
+            await stopScanner();
 
-            // Se decodedText è un URL completo (es scansione da altra app), puliscilo se serve.
-            // Ma noi abbiamo generato: QRCode.toDataURL(qrToken). Quindi il contenuto è ESATTAMENTE il token.
-
-            // Feedback visivo immediato
-            document.getElementById('tokenInput').value = decodedText;
+            // Call API
             doCheckIn(decodedText);
-        }
-
-        function onScanFailure(error) {
-            // handle scan failure, usually better to ignore and keep scanning.
-            // for example:
-            // console.warn(`Code scan error = ${error}`);
         }
 
         function startScanner() {
             document.getElementById('btnStart').style.display = 'none';
             document.getElementById('btnStop').style.display = 'inline-block';
+            document.getElementById('reader').style.display = 'block';
 
             html5QrcodeScanner = new Html5Qrcode("reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
 
-            // Preferenza fotocamera posteriore
-            html5QrcodeScanner.start({ facingMode: "environment" }, config, onScanSuccess);
+            isScanning = true;
+            html5QrcodeScanner.start({ facingMode: "environment" }, config, onScanSuccess)
+                .catch(err => {
+                    alert("Errore avvio fotocamera: " + err);
+                    resetScanner();
+                });
         }
 
         async function stopScanner() {
             if (html5QrcodeScanner) {
-                await html5QrcodeScanner.stop();
+                try {
+                    await html5QrcodeScanner.stop();
+                    html5QrcodeScanner.clear();
+                } catch (e) { console.error(e); }
                 html5QrcodeScanner = null;
             }
+            isScanning = false;
             document.getElementById('btnStart').style.display = 'inline-block';
             document.getElementById('btnStop').style.display = 'none';
         }
 
+        function resetScanner() {
+            stopScanner(); // Ensure stopped
+            document.getElementById('tokenInput').value = "";
+            document.getElementById('reader').innerHTML = ""; // Clear placeholder
+            showView('view-scan');
+        }
+
+        // API CALL
         async function doCheckIn(token) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerText = "Verifica in corso...";
-            resultDiv.className = "";
+            showView('view-loading');
 
             try {
                 const response = await fetch('/api/checkin', {
@@ -150,20 +296,48 @@
                 });
 
                 const data = await response.json();
+                showResult(response.status, data);
 
-                if (response.ok) {
-                    resultDiv.innerHTML = `🎉 OK: ${data.message} <br> Tipo: ${data.tipo}`;
-                    resultDiv.className = "success";
-                    // Play beep sound option here?
-                } else {
-                    resultDiv.innerText = `⛔ ERRORE: ${data.message}`;
-                    if (response.status === 400) resultDiv.className = "warning"; // Già entrato
-                    else resultDiv.className = "error"; // Non trovato
-                }
             } catch (e) {
-                resultDiv.innerText = "Errore di connessione: " + e.message;
-                resultDiv.className = "error";
+                showResult(500, { message: "Errore di rete: " + e.message });
             }
+        }
+
+        function showResult(status, data) {
+            const card = document.getElementById('result-card');
+            let html = '';
+            let statusClass = '';
+
+            if (status === 200) {
+                // SUCCESS
+                statusClass = 'status-ok';
+                html = `
+                    <span class="icon">✅</span>
+                    <span class="status-text">BIGLIETTO VALIDO</span>
+                    <div class="detail-text">${data.message.replace('Benvenuto/a ', '')}</div>
+                    <div class="sub-detail">Tipologia: <strong>${data.tipo.toUpperCase()}</strong></div>
+                `;
+            } else if (status === 400) {
+                // WARNING (Già usato)
+                statusClass = 'status-warn';
+                html = `
+                    <span class="icon">⚠️</span>
+                    <span class="status-text">GIÀ ENTRATO</span>
+                    <div class="detail-text">Questo biglietto è già stato utilizzato.</div>
+                `;
+            } else {
+                // ERROR (404 o altro)
+                statusClass = 'status-ko';
+                html = `
+                    <span class="icon">⛔</span>
+                    <span class="status-text">NON VALIDO</span>
+                    <div class="detail-text">${data.message || 'Biglietto non trovato'}</div>
+                `;
+            }
+
+            card.className = `result-card ${statusClass}`;
+            card.innerHTML = html;
+            showView('view-result');
         }
     </script>
 </body>
