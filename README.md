@@ -1,29 +1,31 @@
 # 🎟️ Event Registration Backend
 
 Sistema completo di registrazione eventi con pagamenti PayPal, generazione QR codes e gestione check-in.
+Progetto **Open Source / Non-Profit** per eventi di beneficenza.
 
 ## 📋 Features
 
 - ✅ **Registrazione multi-partecipante** - Un capogruppo può registrare più persone
 - 💳 **Pagamenti PayPal** - Integrazione completa con PayPal Checkout API
-- 📧 **Email automatiche** - Invio biglietti aggregati in un'unica email
+- 📧 **Email automatiche** - Invio biglietti aggregati in un'unica email tramite Resend
 - 🏎️ **Performance** - Processamento parallelo ordini per feedback istantaneo
 - 🔐 **QR Code univoci** - Generati automaticamente e hostati su Supabase Storage
-- ✅ **Sistema check-in** - Validazione QR code con note partecipanti
+- ✅ **Sistema check-in** - Web app per scannerizzare QR code all'ingresso
 - 📊 **Database Supabase** - Storico completo registrazioni e pagamenti
 
 ## 🛠️ Tecnologie
 
 ### Backend
 - **Netlify Functions** - Serverless functions (Node.js)
-- **Supabase** - Database PostgreSQL
-- **PayPal API** - Gestione pagamenti
-- **Resend** - Invio email transazionali
-- **QRCode** - Generazione QR codes
+- **Supabase** - Database PostgreSQL & Storage
+- **PayPal API** - Gestione pagamenti sicuri
+- **Resend** - Invio email transazionali ad alta affidabilità
+- **QRCode** - Generazione QR codes server-side
 
 ### Frontend
-- **HTML/JavaScript** - Form registrazione
-- **PayPal SDK** - Integrazione checkout
+- **HTML5/CSS3** - Interfaccia responsive e moderna
+- **PayPal SDK** - Integrazione checkout sicura
+- **Html5-Qrcode** - Lettore QR code da browser per il check-in
 
 ## 🚀 Setup Locale
 
@@ -45,11 +47,8 @@ cd event-registration-backend
 # Installa dipendenze
 npm install
 
-# Installa Netlify CLI
+# Installa Netlify CLI (opzionale)
 npm install netlify-cli -g
-
-# Login Netlify
-netlify login
 ```
 
 ### Configurazione
@@ -66,16 +65,16 @@ RESEND_API_KEY=your_resend_api_key
 
 2. **Setup Database Supabase:**
 
-Esegui lo schema SQL:
-```bash
-# Copia il contenuto di database/schema.sql
-# Esegui nel SQL Editor di Supabase
-```
+Esegui lo schema SQL presente in `database/schema.sql` nell'editor SQL di Supabase.
 
 3. **Avvia server locale:**
 
 ```bash
+# Se hai Netlify CLI
 netlify dev
+
+# Oppure
+npm start
 ```
 
 Il server sarà disponibile su `http://localhost:8888`
@@ -89,94 +88,38 @@ event-registration-backend/
 ├── netlify/
 │   └── functions/
 │       ├── utils/
+│       │   ├── constants.js          # Costanti globali (es. etichette biglietti)
+│       │   ├── emailTemplate.js      # Generatore HTML email
 │       │   └── supabase.js           # Client Supabase condiviso
-│       ├── config.js                 # Configurazione pubblica (PayPal Client ID)
+│       ├── config.js                 # Configurazione pubblica (PayPal Client ID, Labels)
 │       ├── create-order.js           # Creazione ordine PayPal
 │       ├── capture-order.js          # Cattura pagamento + email + QR
 │       ├── checkin.js                # Validazione QR all'ingresso
 │       └── test.js                   # Test connessione
 ├── registrazione/
-│   └── registrazione.html            # Form registrazione frontend
-├── .env                               # Variabili d'ambiente (non committato)
-├── .gitignore
-├── netlify.toml                       # Configurazione Netlify
+│   ├── registrazione.html            # Form registrazione principale
+│   ├── registrazione-iframe.html     # Versione per iframe (Wordpress)
+│   └── success.html                  # Pagina conferma
+├── checkin.html                      # Web App Scanner QR
+├── .env                              # Variabili d'ambiente (non committato)
+├── netlify.toml                      # Configurazione build e redirect
 ├── package.json
 └── README.md
 ```
 
 ## 🔌 API Endpoints
 
-### `GET /api/test`
-Test connessione backend
-```json
-{ "message": "Il backend è vivo!" }
-```
+| Metodo | Endpoint | Descrizione |
+|--------|----------|-------------|
+| GET | `/api/config` | Configurazione pubblica (Client ID, Labels) |
+| POST | `/api/create-order` | Inizializza pagamento PayPal |
+| POST | `/api/capture-order` | Finalizza ordine, invia email e genera QR |
+| POST | `/api/checkin` | Valida ingresso tramite token QR |
 
-### `GET /api/config`
-Ottieni configurazione pubblica
-```json
-{
-  "paypalClientId": "xxx",
-  "currency": "EUR"
-}
-```
+## 💰 Prezzi Biglietti & Configurazione
 
-### `POST /api/create-order`
-Crea ordine PayPal
-
-**Request:**
-```json
-{
-  "participants": [
-    {
-      "nome": "Mario Rossi",
-      "email": "mario@test.it",
-      "telefono": "+39 123 456789",
-      "tipo": "adulto",
-      "note": ""
-    }
-  ]
-}
-```
-
-**Response:**
-```json
-{ "id": "PAYPAL_ORDER_ID" }
-```
-
-### `POST /api/capture-order`
-Cattura pagamento, salva DB, invia email
-
-**Request:**
-```json
-{
-  "orderID": "PAYPAL_ORDER_ID",
-  "participants": [...]
-}
-```
-
-**Response:**
-```json
-{ "status": "ok" }
-```
-
-### `POST /api/checkin`
-Valida QR code all'ingresso
-
-**Request:**
-```json
-{ "qr_token": "abc123xyz" }
-```
-
-**Response:**
-```json
-{
-  "message": "Benvenuto/a Mario Rossi!",
-  "tipo": "adulto"
-}
-```
-
-## 💰 Prezzi Biglietti
+Le etichette dei biglietti sono centralizzate in `netlify/functions/utils/constants.js`.
+Il frontend recupera queste etichette dinamicamente via `/api/config`.
 
 | Tipo | Età | Prezzo |
 |------|-----|--------|
@@ -184,76 +127,32 @@ Valida QR code all'ingresso
 | Ragazzo | 12-18 | €5.00 |
 | Minore | <12 | Gratis |
 
-⚠️ Il capogruppo paga sempre come adulto (€10) - forzato server-side per sicurezza.
+## 🚀 Deploy su Netlify & Ottimizzazione
 
-## 🚀 Deploy su Netlify
-
-### 1. Collega GitHub
-
-Il repository è già collegato a Netlify. Ogni push su `main` triggera un deploy automatico.
-
-### 2. Configura Environment Variables
-
-Vai su Netlify Dashboard → Site Settings → Environment Variables
-
-Aggiungi:
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `PAYPAL_CLIENT_ID`
-- `PAYPAL_SECRET`
-- `RESEND_API_KEY`
-
-### 3. Deploy
+### Risparmio Crediti Build
+Per evitare di consumare crediti build inutilmente durante lo sviluppo, usa `[skip ci]` nei messaggi di commit per le modifiche che non richiedono un deploy immediato.
 
 ```bash
-git push origin main
+git commit -m "update styles [skip ci]"
 ```
 
-Il deploy parte automaticamente. URL: `https://event-registration-backend.netlify.app`
-
-## 🧪 Test
-
-### Test Locale
-
-1. Avvia: `netlify dev`
-2. Apri: `http://localhost:8888/registrazione/registrazione.html`
-3. Compila form e usa PayPal Sandbox per testare
-
-### Test Produzione
-
-1. Apri: `https://event-registration-backend.netlify.app/registrazione/registrazione.html`
-2. Usa account PayPal Sandbox da [developer.paypal.com](https://developer.paypal.com)
+### Configurazione Deploy
+1. Collega il repo GitHub a Netlify.
+2. Imposta le **Environment Variables** (SUPABASE_URL, PAYPAL_SECRET, etc.).
+3. Il file `netlify.toml` è già configurato per ottimizzare la build (`command = "exit 0"`).
 
 ## 📊 Database Schema
 
-Tabella `registrations`:
-
-| Campo | Tipo | Descrizione |
-|-------|------|-------------|
-| id | BIGSERIAL | Primary key |
-| nome | TEXT | Nome partecipante |
-| email | TEXT | Email |
-| telefono | TEXT | Telefono (obbligatorio) |
-| tipo_partecipante | TEXT | adulto/ragazzo/minore |
-| importo_pagato | DECIMAL | Importo pagato |
-| pagato | BOOLEAN | Stato pagamento |
-| paypal_order_id | TEXT | ID PayPal |
-| numero_ordine_gruppo | INTEGER | ID gruppo |
-| qr_token | TEXT | Token QR univoco |
-| checked_in | BOOLEAN | Flag check-in |
-| checked_in_at | TIMESTAMP | Timestamp check-in |
-| email_inviata | BOOLEAN | Flag email inviata |
-| note | TEXT | Note partecipante |
-| created_at | TIMESTAMP | Data creazione |
-| updated_at | TIMESTAMP | Data aggiornamento |
+La tabella principale è `registrations`. Campi chiave:
+- `qr_token`: Identificativo univoco per il QR Code.
+- `checked_in`: Booleano, diventa `true` all'ingresso.
+- `email_inviata`: Flag di conferma invio biglietti.
 
 ## 🔒 Sicurezza
 
-- ✅ File `.env` escluso da Git (in `.gitignore`)
-- ✅ Secrets solo lato server (Netlify Functions)
-- ✅ PayPal Secret mai esposto al client
-- ✅ Validazione server-side per prezzi
+- ✅ Secrets gestiti lato server (Netlify Functions)
 - ✅ Row Level Security (RLS) su Supabase
+- ✅ Validazione QR Code server-side
 
 ## 📝 License
 
@@ -263,7 +162,3 @@ MIT
 
 Gabriele Stefano
 - GitHub: [@gabrielestefano1983](https://github.com/gabrielestefano1983)
-
-## 🤝 Support
-
-Per problemi o domande, apri una [issue](https://github.com/gabrielestefano1983/event-registration-backend/issues).
