@@ -57,8 +57,33 @@ exports.handler = async (event) => {
             for (const p of participants) {
                 console.log(`Processing ${p.nome}...`);
                 const qrToken = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-                console.log(`[DEBUG] Generated QR Token for ${p.nome}: ${qrToken}`); // Log per test copia-incolla
-                const qrDataUrl = await QRCode.toDataURL(qrToken);
+                console.log(`[DEBUG] Generated QR Token for ${p.nome}: ${qrToken}`);
+
+                // Generate QR Buffer
+                const qrBuffer = await QRCode.toBuffer(qrToken);
+
+                // Upload QR to Supabase Storage
+                const fileName = `qr-${qrToken}.png`;
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('qr-codes')
+                    .upload(fileName, qrBuffer, {
+                        contentType: 'image/png',
+                        upsert: true
+                    });
+
+                let qrDataUrl;
+                if (uploadError) {
+                    console.error('Supabase Storage Upload Error:', uploadError);
+                    // Fallback to Data URL if upload fails, though this might trigger the warning again
+                    qrDataUrl = await QRCode.toDataURL(qrToken);
+                } else {
+                    const { data: publicUrlData } = supabase.storage
+                        .from('qr-codes')
+                        .getPublicUrl(fileName);
+                    qrDataUrl = publicUrlData.publicUrl;
+                    console.log(`QR Uploaded to: ${qrDataUrl}`);
+                }
+
                 const importo = listino[p.tipo] || 0.00;
 
                 // Salvataggio Supabase
