@@ -8,205 +8,229 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background: #000;
             height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* HEADER */
+        /* HEADER - Minimal overlay */
         header {
-            background: #fff;
-            padding: 1rem;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px 0;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            z-index: 10;
+            z-index: 20;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            pointer-events: none;
         }
 
-        header h1 {
-            margin: 0;
-            font-size: 1.2rem;
-            color: #333;
-        }
-
-        /* MAIN VIEWS */
+        /* VIEWS */
         .view {
             flex: 1;
-            padding: 1rem;
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            width: 100%;
+            height: 100%;
         }
 
         .view.active {
             display: flex;
         }
 
-        /* SCANNER VIEW */
-        #reader {
-            width: 100%;
-            max-width: 400px;
-            border-radius: 12px;
-            overflow: hidden;
+        /* SCANNER VIEW - Full screen camera */
+        #view-scan {
+            position: relative;
             background: #000;
-            margin-bottom: 20px;
         }
 
+        #reader {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* CONTROLS OVERLAY */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        /* BUTTONS */
         .btn-large {
-            padding: 15px 30px;
-            font-size: 1.2rem;
+            padding: 15px 40px;
+            font-size: 1.1rem;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            width: 80%;
-            max-width: 300px;
-            font-weight: bold;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             transition: transform 0.1s;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .btn-large:active {
-            transform: scale(0.98);
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .btn-primary {
             background: #007bff;
             color: white;
+            border: none;
         }
 
-        .btn-danger {
-            background: #dc3545;
-            color: white;
+        /* RESULT CARD - Popup over camera */
+        .view-result-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
-        .btn-success {
-            background: #28a745;
-            color: white;
-            margin-top: 20px;
+        .view-result-overlay.active {
+            display: flex;
+            animation: fadeIn 0.2s ease-out;
         }
 
-        /* RESULT VIEW */
         .result-card {
             background: white;
-            padding: 40px;
-            border-radius: 20px;
+            padding: 30px 20px;
+            border-radius: 25px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 350px;
+            width: 100%;
+            max-width: 320px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .icon {
             font-size: 80px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: block;
+            line-height: 1;
         }
 
         .status-text {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 15px;
             display: block;
+            letter-spacing: -0.5px;
         }
 
         .detail-text {
-            font-size: 18px;
-            color: #666;
+            font-size: 20px;
+            color: #333;
             margin-bottom: 5px;
+            font-weight: 500;
         }
 
         .sub-detail {
             font-size: 14px;
-            color: #999;
+            color: #888;
             margin-top: 5px;
+            text-transform: uppercase;
+            font-weight: 600;
         }
 
-        /* COLORS */
-        .status-ok .icon {
-            color: #28a745;
-        }
-
+        /* STATUS COLORS */
+        .status-ok .icon,
         .status-ok .status-text {
             color: #28a745;
         }
 
-        .status-ko .icon {
-            color: #dc3545;
-        }
-
+        .status-ko .icon,
         .status-ko .status-text {
             color: #dc3545;
         }
 
-        .status-warn .icon {
+        .status-warn .icon,
+        .status-warn .status-text {
             color: #ffc107;
         }
 
-        .status-warn .status-text {
-            color: #d39e00;
-        }
-
-        /* Manual Input */
-        .manual-input {
-            margin-top: 30px;
-            width: 100%;
-            text-align: center;
-            border-top: 1px solid #ddd;
-            padding-top: 20px;
-        }
-
-        input {
-            /* Manual Input Removed */
-
-            @keyframes popIn {
-                from {
-                    transform: scale(0.8);
-                    opacity: 0;
-                }
-
-                to {
-                    transform: scale(1);
-                    opacity: 1;
-                }
+        @keyframes popIn {
+            from {
+                transform: scale(0.9) translateY(20px);
+                opacity: 0;
             }
+
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
 <body>
 
     <header>
-        <h1>Staff Check-in</h1>
+        Loredoperlavita Check-in
     </header>
 
-    <!-- VIEW 1: SCANNER -->
+    <!-- MAIN CAMERA VIEW -->
     <div id="view-scan" class="view active">
         <div id="reader"></div>
 
-        <button onclick="startScanner()" id="btnStart" class="btn-large btn-primary">📷 Scansiona QR</button>
-        <button onclick="stopScanner()" id="btnStop" class="btn-large btn-danger" style="display:none;">Stop</button>
+        <div class="controls">
+            <!-- Stop button only if really needed, simplified UI means less buttons -->
+            <button onclick="toggleCamera()" id="btnAction" class="btn-large">Stop Camera</button>
+        </div>
     </div>
 
-    <!-- VIEW 2: RESULT -->
-    <div id="view-result" class="view">
+    <!-- RESULT OVERLAY -->
+    <div id="view-result" class="view-result-overlay">
         <div id="result-card" class="result-card">
             <!-- Content filled by JS -->
         </div>
-        <button onclick="resetScanner()" class="btn-large btn-primary" style="margin-top: 30px;">Scansiona
-            Prossimo</button>
+        <button onclick="resetScanner()" class="btn-large btn-primary"
+            style="margin-top: 30px; width: 100%; max-width: 320px;">Scansiona Prossimo</button>
     </div>
 
-    <!-- VIEW 3: LOADING -->
-    <div id="view-loading" class="view">
+    <!-- LOADING OVERLAY -->
+    <div id="view-loading" class="view-result-overlay">
         <div class="result-card">
-            <span class="icon">⏳</span>
-            <span class="status-text" style="color:#666">Verifica in corso...</span>
+            <span class="icon" style="font-size: 50px;">⏳</span>
+            <span class="status-text" style="color:#666; font-size: 20px;">Verifica...</span>
         </div>
     </div>
 
@@ -214,37 +238,36 @@
         let html5QrcodeScanner;
         let isScanning = false;
 
-        // UI SWITCHING
-        function showView(viewId) {
-            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-        }
+        // Auto-start on load
+        window.onload = () => {
+            startScanner();
+        };
 
-        // SCANNER LOGIC
-        async function onScanSuccess(decodedText, decodedResult) {
-            if (!isScanning) return;
-            isScanning = false;
-
-            // Stop noise/feedback loop
-            await stopScanner();
-
-            // Call API
-            doCheckIn(decodedText);
+        function toggleCamera() {
+            if (isScanning) stopScanner();
+            else startScanner();
         }
 
         function startScanner() {
-            document.getElementById('btnStart').style.display = 'none';
-            document.getElementById('btnStop').style.display = 'inline-block';
-            document.getElementById('reader').style.display = 'block';
+            document.getElementById('btnAction').innerText = "Stop Camera";
+            document.getElementById('btnAction').style.background = "rgba(255, 59, 48, 0.3)"; // Red tint
 
-            html5QrcodeScanner = new Html5Qrcode("reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+            if (html5QrcodeScanner) {
+                // Already init? resume? safe re-init
+            } else {
+                html5QrcodeScanner = new Html5Qrcode("reader");
+            }
+
+            const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: window.innerHeight / window.innerWidth };
 
             isScanning = true;
+
+            // Preferenza fotocamera posteriore
             html5QrcodeScanner.start({ facingMode: "environment" }, config, onScanSuccess)
                 .catch(err => {
-                    alert("Errore avvio fotocamera: " + err);
-                    resetScanner();
+                    console.error(err);
+                    document.getElementById('btnAction').innerText = "Start Camera";
+                    // alert("Errore fotocamera: " + err);
                 });
         }
 
@@ -252,25 +275,43 @@
             if (html5QrcodeScanner) {
                 try {
                     await html5QrcodeScanner.stop();
-                    html5QrcodeScanner.clear();
+                    // html5QrcodeScanner.clear(); // Keep the placeholder or clear? Clear removes video element
                 } catch (e) { console.error(e); }
-                html5QrcodeScanner = null;
+                // html5QrcodeScanner = null; // Do not destroy instance if we want to restart fast?
             }
             isScanning = false;
-            document.getElementById('btnStart').style.display = 'inline-block';
-            document.getElementById('btnStop').style.display = 'none';
+            document.getElementById('btnAction').innerText = "Start Camera";
+            document.getElementById('btnAction').style.background = "rgba(255, 255, 255, 0.2)";
         }
 
         function resetScanner() {
-            stopScanner(); // Ensure stopped
-            document.getElementById('tokenInput').value = "";
-            document.getElementById('reader').innerHTML = ""; // Clear placeholder
-            showView('view-scan');
+            closeOverlay('view-result');
+            if (!isScanning) startScanner();
         }
 
-        // API CALL
+        // OVERLAYS
+        function openOverlay(id) {
+            document.getElementById(id).classList.add('active');
+        }
+        function closeOverlay(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // SCAN LOGIC
+        async function onScanSuccess(decodedText, decodedResult) {
+            if (!isScanning) return;
+
+            // Pause scanning logic implicitly by overlay covering it? NO, better verify logic
+            // We don't stop the camera stream for speed, just stop processing
+            isScanning = false;
+            await stopScanner(); // Stop camera to save battery/cpu while reading result
+
+            doCheckIn(decodedText);
+        }
+
+        // API
         async function doCheckIn(token) {
-            showView('view-loading');
+            openOverlay('view-loading');
 
             try {
                 const response = await fetch('/api/checkin', {
@@ -280,10 +321,12 @@
                 });
 
                 const data = await response.json();
+                closeOverlay('view-loading');
                 showResult(response.status, data);
 
             } catch (e) {
-                showResult(500, { message: "Errore di rete: " + e.message });
+                closeOverlay('view-loading');
+                showResult(500, { message: "Errore di rete" });
             }
         }
 
@@ -293,35 +336,32 @@
             let statusClass = '';
 
             if (status === 200) {
-                // SUCCESS
                 statusClass = 'status-ok';
                 html = `
                     <span class="icon">✅</span>
-                    <span class="status-text">BIGLIETTO VALIDO</span>
+                    <span class="status-text">VALIDO</span>
                     <div class="detail-text">${data.message.replace('Benvenuto/a ', '')}</div>
-                    <div class="sub-detail">Tipologia: <strong>${data.tipo.toUpperCase()}</strong></div>
+                    <div class="sub-detail">${data.tipo ? data.tipo.toUpperCase() : ''}</div>
                 `;
             } else if (status === 400) {
-                // WARNING (Già usato)
                 statusClass = 'status-warn';
                 html = `
                     <span class="icon">⚠️</span>
                     <span class="status-text">GIÀ ENTRATO</span>
-                    <div class="detail-text">Questo biglietto è già stato utilizzato.</div>
+                    <div class="detail-text">Usato in precedenza</div>
                 `;
             } else {
-                // ERROR (404 o altro)
                 statusClass = 'status-ko';
                 html = `
                     <span class="icon">⛔</span>
                     <span class="status-text">NON VALIDO</span>
-                    <div class="detail-text">${data.message || 'Biglietto non trovato'}</div>
+                    <div class="detail-text">Biglietto sconosciuto</div>
                 `;
             }
 
             card.className = `result-card ${statusClass}`;
             card.innerHTML = html;
-            showView('view-result');
+            openOverlay('view-result');
         }
     </script>
 </body>
