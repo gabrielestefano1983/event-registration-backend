@@ -57,6 +57,7 @@ exports.handler = async (event) => {
             for (const p of participants) {
                 console.log(`Processing ${p.nome}...`);
                 const qrToken = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+                console.log(`[DEBUG] Generated QR Token for ${p.nome}: ${qrToken}`); // Log per test copia-incolla
                 const qrDataUrl = await QRCode.toDataURL(qrToken);
                 const importo = listino[p.tipo] || 0.00;
 

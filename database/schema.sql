@@ -1,77 +1,39 @@
--- Schema per il sistema di registrazione eventi
--- Esegui questo script nel SQL Editor di Supabase
+-- Schema attuale del database (allineato con Supabase)
 
--- Creazione tabella registrations
-CREATE TABLE IF NOT EXISTS registrations (
-  id BIGSERIAL PRIMARY KEY,
-  nome TEXT NOT NULL,
-  email TEXT NOT NULL,
-  telefono TEXT NOT NULL,
-  tipo_partecipante TEXT NOT NULL CHECK (tipo_partecipante IN ('adulto', 'ragazzo', 'minore')),
-  importo_pagato DECIMAL(10,2) DEFAULT 0.00,
-  pagato BOOLEAN DEFAULT false,
-  paypal_order_id TEXT,
-  numero_ordine_gruppo BIGINT,
-  qr_token TEXT UNIQUE NOT NULL,
-  checked_in BOOLEAN DEFAULT false,
-  checked_in_at TIMESTAMP WITH TIME ZONE,
-  email_inviata BOOLEAN DEFAULT false,
-  note TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+create table public.registrations (
+  id bigserial not null,
+  nome text not null,
+  email text not null,
+  telefono text not null,
+  tipo_partecipante text not null,
+  importo_pagato numeric(10, 2) null default 0.00,
+  pagato boolean null default false,
+  paypal_order_id text null,
+  numero_ordine_gruppo bigint null,
+  qr_token text not null,
+  checked_in boolean null default false,
+  checked_in_at timestamp with time zone null,
+  email_inviata boolean null default false,
+  note text null,
+  created_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone null default now(),
+  constraint registrations_pkey primary key (id),
+  constraint registrations_qr_token_key unique (qr_token),
+  constraint registrations_tipo_partecipante_check check (
+    (
+      tipo_partecipante = any (
+        array['adulto'::text, 'ragazzo'::text, 'minore'::text]
+      )
+    )
+  )
+) TABLESPACE pg_default;
 
--- Indici per performance
-CREATE INDEX IF NOT EXISTS idx_registrations_qr_token ON registrations(qr_token);
-CREATE INDEX IF NOT EXISTS idx_registrations_email ON registrations(email);
-CREATE INDEX IF NOT EXISTS idx_registrations_paypal_order ON registrations(paypal_order_id);
+create index IF not exists idx_registrations_qr_token on public.registrations using btree (qr_token) TABLESPACE pg_default;
 
--- Funzione per aggiornare automaticamente updated_at
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+create index IF not exists idx_registrations_email on public.registrations using btree (email) TABLESPACE pg_default;
 
--- Trigger per updated_at
-DROP TRIGGER IF EXISTS update_registrations_updated_at ON registrations;
-CREATE TRIGGER update_registrations_updated_at
-  BEFORE UPDATE ON registrations
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+create index IF not exists idx_registrations_paypal_order on public.registrations using btree (paypal_order_id) TABLESPACE pg_default;
 
--- Row Level Security (RLS) - IMPORTANTE per sicurezza
-ALTER TABLE registrations ENABLE ROW LEVEL SECURITY;
-
--- Policy: permettiamo inserimenti solo tramite service role
-CREATE POLICY "Enable insert for service role" ON registrations
-  FOR INSERT
-  WITH CHECK (true);
-
--- Policy: permettiamo letture solo tramite service role
-CREATE POLICY "Enable read for service role" ON registrations
-  FOR SELECT
-  USING (true);
-
--- Policy: permettiamo update solo tramite service role
-CREATE POLICY "Enable update for service role" ON registrations
-  FOR UPDATE
-  USING (true);
-
--- Commenti per documentazione
-COMMENT ON TABLE registrations IS 'Tabella principale per le registrazioni agli eventi';
-COMMENT ON COLUMN registrations.nome IS 'Nome completo del partecipante';
-COMMENT ON COLUMN registrations.email IS 'Email del partecipante (o del capogruppo)';
-COMMENT ON COLUMN registrations.telefono IS 'Numero di telefono per contatto (partecipante o capogruppo)';
-COMMENT ON COLUMN registrations.tipo_partecipante IS 'Tipo di biglietto: adulto (€10), ragazzo (€5), minore (€0)';
-COMMENT ON COLUMN registrations.importo_pagato IS 'Importo effettivo pagato per questo partecipante in EUR';
-COMMENT ON COLUMN registrations.pagato IS 'Flag che indica se il pagamento è stato completato';
-COMMENT ON COLUMN registrations.paypal_order_id IS 'ID ordine PayPal per tracciabilità';
-COMMENT ON COLUMN registrations.numero_ordine_gruppo IS 'Numero progressivo per identificare i partecipanti dello stesso gruppo/ordine';
-COMMENT ON COLUMN registrations.qr_token IS 'Token univoco generato per il QR code del biglietto';
-COMMENT ON COLUMN registrations.checked_in IS 'Flag che indica se il partecipante ha fatto check-in all''evento';
-COMMENT ON COLUMN registrations.checked_in_at IS 'Timestamp esatto del momento del check-in';
-COMMENT ON COLUMN registrations.email_inviata IS 'Flag che indica se l''email con il biglietto è stata inviata con successo';
-COMMENT ON COLUMN registrations.note IS 'Note aggiuntive (allergie, esigenze speciali, note staff)';
+create trigger update_registrations_updated_at BEFORE
+update on registrations for EACH row
+execute FUNCTION update_updated_at_column ();

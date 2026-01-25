@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Check-in Scanner (Simulazione)</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        input {
+            font-size: 1.2rem;
+            padding: 10px;
+            width: 80%;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        #result {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Staff Check-in Panel</h1>
+    <p>Inserisci il token letto dal QR Code (o copialo dalla console/db)</p>
+
+    <input type="text" id="tokenInput" placeholder="Incolla qui il QR Token" />
+    <br>
+    <button onclick="checkIn()">✅ Valida Biglietto</button>
+
+    <div id="result">In attesa...</div>
+
+    <script>
+        async function checkIn() {
+            const token = document.getElementById('tokenInput').value.trim();
+            const resultDiv = document.getElementById('result');
+
+            if (!token) {
+                alert("Inserisci un token!");
+                return;
+            }
+
+            resultDiv.innerText = "Verifica in corso...";
+            resultDiv.className = "";
+
+            try {
+                const response = await fetch('/api/checkin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ qr_token: token })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `🎉 OK: ${data.message} <br> Tipo: ${data.tipo}`;
+                    resultDiv.className = "success";
+                } else {
+                    resultDiv.innerText = `⛔ ERRORE: ${data.message}`;
+                    if (response.status === 400) resultDiv.className = "warning"; // Già entrato
+                    else resultDiv.className = "error"; // Non trovato
+                }
+            } catch (e) {
+                resultDiv.innerText = "Errore di connessione: " + e.message;
+                resultDiv.className = "error";
+            }
+        }
+    </script>
+</body>
+
+</html>
