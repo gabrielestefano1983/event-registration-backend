@@ -163,23 +163,19 @@
         }
 
         input {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 60%;
-        }
+            /* Manual Input Removed */
 
-        @keyframes popIn {
-            from {
-                transform: scale(0.8);
-                opacity: 0;
-            }
+            @keyframes popIn {
+                from {
+                    transform: scale(0.8);
+                    opacity: 0;
+                }
 
-            to {
-                transform: scale(1);
-                opacity: 1;
+                to {
+                    transform: scale(1);
+                    opacity: 1;
+                }
             }
-        }
     </style>
 </head>
 
@@ -195,12 +191,6 @@
 
         <button onclick="startScanner()" id="btnStart" class="btn-large btn-primary">📷 Scansiona QR</button>
         <button onclick="stopScanner()" id="btnStop" class="btn-large btn-danger" style="display:none;">Stop</button>
-
-        <div class="manual-input">
-            <p style="font-size: 0.9rem; color: #666;">Oppure inserisci codice manuale:</p>
-            <input type="text" id="tokenInput" placeholder="QR Token..." />
-            <button onclick="checkInManual()" style="padding: 10px; cursor: pointer;">OK</button>
-        </div>
     </div>
 
     <!-- VIEW 2: RESULT -->
@@ -228,12 +218,6 @@
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
-        }
-
-        function checkInManual() {
-            const token = document.getElementById('tokenInput').value.trim();
-            if (!token) { alert("Inserisci un token!"); return; }
-            doCheckIn(token);
         }
 
         // SCANNER LOGIC
