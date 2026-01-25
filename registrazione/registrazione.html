@@ -229,7 +229,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ orderID: data.orderID, participants: getFullData() })
                 });
-                if (res.ok) { alert('Successo! Email inviata a ' + leaderData.email); window.location.reload(); }
+                if (res.ok) {
+                    // Redirect alla pagina di successo con email
+                    window.location.href = `/registrazione/success.html?email=${encodeURIComponent(leaderData.email)}`;
+                } else {
+                    alert('Si è verificato un errore. Contattaci se il problema persiste.');
+                }
             }
         }).render('#paypal-button-container');
 
