@@ -87,7 +87,7 @@ exports.handler = async (event) => {
                 console.log('Sending Email...');
                 try {
                     const emailRes = await resend.emails.send({
-                        from: 'onboarding@resend.dev', // Revert temporaneo per testare
+                        from: 'Loredoperlavita <info@loredoperlavita.it>', // Dominio verificato
                         to: masterEmail,
                         subject: `Biglietto di ingresso per ${p.nome}`,
                         html: `<div style="text-align:center; font-family:sans-serif;">
