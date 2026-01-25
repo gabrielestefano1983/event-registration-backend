@@ -534,7 +534,8 @@
                     const statusLabel = t.checked_in ? '⚠️ GIÀ ENTRATO' : '✅ DA SCANSIONARE';
 
                     item.className = `search-item ${statusClass}`;
-                    item.onclick = () => selectTicket(t.qr_token);
+                    // Passa nome ed email per la conferma
+                    item.onclick = () => selectTicket(t.qr_token, t.nome, t.email);
                     item.innerHTML = `
                         <div style="font-weight:bold; font-size:1.1rem;">${t.nome}</div>
                         <div style="font-size:0.9rem; color:#555;">${t.email}</div>
@@ -551,9 +552,12 @@
             }
         }
 
-        function selectTicket(token) {
-            closeSearch();
-            doCheckIn(token);
+        function selectTicket(token, name, email) {
+            // Conferma esplicita prima di procedere
+            if (confirm(`Confermi il Check-in manuale per:\n\n👤 ${name}\n📧 ${email}?`)) {
+                closeSearch();
+                doCheckIn(token);
+            }
         }
     </script>
 </body>
