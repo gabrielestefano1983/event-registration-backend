@@ -11,7 +11,7 @@ exports.handler = async (event) => {
 
     try {
         const data = await resend.emails.send({
-            from: 'Loredoperlavita <info@loredoperlavita.it>',
+            from: 'onboarding@resend.dev',
             to: ['gabriele.stefano@email.it'], // Tua email fissa per test
             subject: 'Test invio email Evento',
             html: '<strong>Funziona!</strong> <p>Se leggi questo, la configurazione Resend è corretta.</p>'
