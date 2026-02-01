@@ -75,27 +75,19 @@ function renderEmailTemplate(template, variables) {
  * @returns {string} - HTML dei biglietti
  */
 function generateTicketsHtml(tickets) {
-    return tickets.map(ticket => {
-        // Determine if ticket is free
-        const isFree = ticket.gratuito === true || ticket.importo === 0;
-
-        return `
+    return tickets.map(ticket => `
         <div style="border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 15px 0; background: #f7fafc;">
             <h3 style="margin: 0 0 10px 0; color: #2d3748;">${ticket.nome}</h3>
             <p style="margin: 5px 0; color: #4a5568;">
                 <strong>Tipo:</strong> ${ticket.tipo_label || ticket.tipo}
             </p>
             ${ticket.note ? `<p style="margin: 5px 0; color: #718096;"><strong>Note:</strong> ${ticket.note}</p>` : ''}
-            ${isFree
-                ? `<p style="margin: 5px 0; color: #48bb78; font-weight: bold;"><strong>🎟️ GRATUITO</strong></p>`
-                : `<p style="margin: 5px 0; color: #2d3748;"><strong>Importo:</strong> €${ticket.importo.toFixed(2)}</p>`
-            }
+            <p style="margin: 5px 0; color: #2d3748;"><strong>Importo:</strong> €${ticket.importo.toFixed(2)}</p>
             <div style="text-align: center; margin-top: 15px;">
                 <img src="${ticket.qrUrl}" alt="QR Code ${ticket.nome}" style="max-width: 200px; height: auto;" />
             </div>
         </div>
-    `;
-    }).join('');
+    `).join('');
 }
 
 module.exports = {
