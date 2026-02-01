@@ -95,19 +95,22 @@ exports.handler = async (event) => {
 
                     // C. Salvataggio DB (Network IO)
                     const importo = listino[p.tipo] || 0.00;
+                    const isGratuito = p.gratuito === true; // Check if marked as free ticket
+
                     const { error: dbError } = await supabase.from('registrations').insert([{
                         nome: p.nome,
                         email: p.email || masterEmail,
                         telefono: p.telefono || masterTelefono,
                         tipo_partecipante: p.tipo,
-                        importo_pagato: importo,
+                        importo_pagato: isGratuito ? 0.00 : importo,
                         pagato: true,
                         paypal_order_id: orderID,
                         numero_ordine_gruppo: numeroGruppo,
                         qr_token: qrToken,
                         note: p.note || null,
                         email_inviata: false,
-                        evento_id: eventId  // ← Salva l'evento
+                        evento_id: eventId,
+                        gratuito: isGratuito
                     }]);
 
                     if (dbError) {
@@ -127,7 +130,8 @@ exports.handler = async (event) => {
                             qrUrl: qrDataUrl,
                             qrToken: qrToken,
                             note: p.note,
-                            importo: importo
+                            importo: isGratuito ? 0.00 : importo,
+                            gratuito: isGratuito
                         }
                     };
 
