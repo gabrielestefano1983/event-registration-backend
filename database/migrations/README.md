@@ -65,6 +65,13 @@ Dove:
 - Mostrato in pagine registrazione
 - Placeholder `{{INDIRIZZO_EVENTO}}` per email
 
+### `006_update_email_template.sql`
+**Data**: 2026-02-01  
+**Stato**: ⏳ Da applicare  
+**Descrizione**: Finalizza template email
+- Aggiorna il template includendo sia DATA_ORA che INDIRIZZO
+- Migliora layout header con badge
+
 ## 🚀 Come Applicare Migrazioni
 
 ### In Ordine (Prima Installazione)
@@ -122,5 +129,5 @@ AND column_name = 'gratuito';
 
 ---
 
-**Ultima Migrazione**: 005  
-**Prossima Disponibile**: 006
+**Ultima Migrazione**: 006  
+**Prossima Disponibile**: 007
