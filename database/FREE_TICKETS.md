@@ -40,40 +40,39 @@ CHECK (
 
 ## 🔧 Come Funziona
 
-### Backend (capture-order.js)
+### Gestione Manuale (Solo SQL)
 
-```javascript
-const isGratuito = p.gratuito === true;
+Il campo `gratuito` deve essere gestito **manualmente via SQL**, NON tramite l'API di registrazione normale.
 
-await supabase.from('registrations').insert([{
-    nome: p.nome,
-    importo_pagato: isGratuito ? 0.00 : importo,
-    pagato: true,
-    gratuito: isGratuito
-    // ... altri campi
-}]);
+**Tutti i ticket creati via PayPal** hanno sempre `gratuito = false`.
+
+**Per creare ticket gratuiti**, usa SQL direttamente:
+
+```sql
+INSERT INTO registrations (
+    nome, email, telefono, tipo_partecipante,
+    importo_pagato, pagato, qr_token, evento_id, 
+    gratuito  -- ← Imposta manualmente
+) VALUES (
+    'Mario Rossi', 'mario@example.com', '123', 'adulto',
+    0.00, true, 'manual-' || gen_random_uuid(), 1,
+    true  -- ← TICKET GRATUITO
+);
 ```
 
 ### Email Template
 
-I ticket gratuiti mostrano **"🎟️ GRATUITO"** in verde invece del prezzo:
+Quando il sistema invia email (o le re-invia), controlla il campo `gratuito` dal database.
 
-```html
-<!-- Ticket normale -->
-<p><strong>Importo:</strong> €15.00</p>
-
-<!-- Ticket gratuito -->
-<p style="color: #48bb78; font-weight: bold;">
-    <strong>🎟️ GRATUITO</strong>
-</p>
-```
+I ticket con `gratuito=true` mostrano **"🎟️ GRATUITO"** in verde invece del prezzo.
 
 ---
 
 ## 📝 Esempi
 
-### Creare un Ticket Gratuito (SQL)
+### Via SQL (Inserimento Manuale)
 
+**Esempio completo:**
 ```sql
 INSERT INTO registrations (
     nome,
@@ -93,30 +92,14 @@ INSERT INTO registrations (
     'adulto',
     0.00,
     true,
-    0,
-    generate_random_token(),
+    0,  -- Nessun gruppo PayPal
+    'manual-' || gen_random_uuid(),
     1,
     true  -- ← TICKET GRATUITO
 );
 ```
 
-### Via API (Payload)
-
-Quando invii partecipanti all'API, aggiungi `gratuito: true`:
-
-```json
-{
-  "eventId": 1,
-  "participants": [
-    {
-      "nome": "Mario Rossi",
-      "email": "mario@example.com",
-      "tipo": "adulto",
-      "gratuito": true  // ← TICKET GRATUITO
-    }
-  ]
-}
-```
+> **Nota**: I ticket creati tramite il flusso normale di registrazione PayPal hanno SEMPRE `gratuito = false`.
 
 ---
 
