@@ -49,6 +49,14 @@ Dove:
 - Validazione eventi ora basata solo su `attivo`
 - Data/ora mostrata nella pagina di registrazione
 
+### `004_update_email_template.sql`
+**Data**: 2026-02-01  
+**Stato**: ⏳ Da applicare  
+**Descrizione**: Aggiorna template email
+- Aggiunge `{{DATA_ORA_EVENTO}}` al template
+- Design migliorato con data in evidenza
+- Mostra numero biglietti
+
 ## 🚀 Come Applicare Migrazioni
 
 ### In Ordine (Prima Installazione)
@@ -106,5 +114,5 @@ AND column_name = 'gratuito';
 
 ---
 
-**Ultima Migrazione**: 003  
-**Prossima Disponibile**: 004
+**Ultima Migrazione**: 004  
+**Prossima Disponibile**: 005
