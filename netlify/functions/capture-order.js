@@ -2,6 +2,7 @@ const { supabase } = require('./utils/supabase');
 const { Resend } = require('resend');
 const QRCode = require('qrcode');
 const { getTicketsEmailHtml } = require('./utils/emailTemplate');
+const { LISTINO_PREZZI } = require('./utils/constants');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const PAYPAL_API = 'https://api-m.sandbox.paypal.com';
@@ -49,7 +50,6 @@ exports.handler = async (event) => {
         if (captureData.status === 'COMPLETED' || captureData.status === 'APPROVED') {
             // 3. Elaborazione Parallela Partecipanti
             console.log('3. Processing Participants (Parallel)...');
-            const listino = { adulto: 10.00, ragazzo: 5.00, minore: 0.00 };
             const numeroGruppo = Date.now();
 
             // Creiamo un array di PROMESSE (operazioni che partono insieme)
@@ -82,7 +82,7 @@ exports.handler = async (event) => {
                     }
 
                     // C. Salvataggio DB (Network IO)
-                    const importo = listino[p.tipo] || 0.00;
+                    const importo = LISTINO_PREZZI[p.tipo] || 0.00;
                     const { error: dbError } = await supabase.from('registrations').insert([{
                         nome: p.nome,
                         email: p.email || masterEmail,

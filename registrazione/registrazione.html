@@ -85,13 +85,11 @@
             ? 'http://localhost:8888/api'
             : 'https://poetic-phoenix-66e16b.netlify.app/api';
 
-        const PREZZI = { adulto: 10, ragazzo: 5, minore: 0 };
-
         // Carica configurazione PayPal dal server in modo sicuro
         async function loadPayPalSDK() {
             const configRes = await fetch(`${API_BASE}/config`);
             const config = await configRes.json();
-            window.evtConfig = config; // Store config globally for labels
+            window.evtConfig = config; // Store config globally (labels + prezzi)
 
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -133,15 +131,16 @@
 
             // Calcola e aggiorna il totale
             function updateTotal() {
-                let totale = PREZZI.adulto; // Il leader è sempre 10€
-                extraParticipants.forEach(p => { totale += PREZZI[p.tipo]; });
+                const prezzi = window.evtConfig?.prezzi || { adulto: 10, ragazzo: 5, minore: 0 };
+                let totale = prezzi.adulto; // Il leader è sempre adulto
+                extraParticipants.forEach(p => { totale += prezzi[p.tipo]; });
                 totalEl.innerText = totale.toFixed(2) + '€';
             }
 
             // Aggiorna etichetta capogruppo (solo visiva)
             if (window.evtConfig && window.evtConfig.tipoLabels) {
                 const lLabel = window.evtConfig.tipoLabels['adulto'] || 'Maggiore 18 anni';
-                const lPrice = PREZZI.adulto.toFixed(2);
+                const lPrice = (window.evtConfig.prezzi?.adulto || 10).toFixed(2);
                 const el = document.getElementById('leader-ticket-label');
                 if (el) el.innerText = `Biglietto: ${lLabel} (€${lPrice})`;
             }
@@ -154,6 +153,7 @@
                     'ragazzo': 'Tra 12 e 18 anni',
                     'minore': 'Minore 12 anni'
                 };
+                const prezzi = window.evtConfig?.prezzi || { adulto: 10, ragazzo: 5, minore: 0 };
 
                 extraParticipants.forEach((p, i) => {
                     const div = document.createElement('div');
@@ -161,12 +161,9 @@
                     div.style = "position: relative; margin-bottom: 20px; padding: 20px; border: 2px solid #cbd5e0; border-radius: 12px; background: #fff;";
 
                     // Genera opzioni dinamicamente
-                    const optionsHtml = Object.keys(PREZZI).map(k => {
+                    const optionsHtml = Object.keys(prezzi).map(k => {
                         const label = labels[k] || k;
-                        // const price = PREZZI[k] === 0 ? 'Gratis' : `€${PREZZI[k].toFixed(2)}`;
-                        // Nota: Il prompt chiedeva "faccia vedere in realtà la frase". Mantengo anche il prezzo per chiarezza UI?
-                        // L'originale aveva (€10.00). Userò lo stesso formato.
-                        const price = PREZZI[k] === 0 ? 'Gratis' : `€${PREZZI[k].toFixed(2)}`;
+                        const price = prezzi[k] === 0 ? 'Gratis' : `€${prezzi[k].toFixed(2)}`;
                         return `<option value="${k}" ${p.tipo === k ? 'selected' : ''}>${label} (${price})</option>`;
                     }).join('');
 

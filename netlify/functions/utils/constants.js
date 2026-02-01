@@ -4,4 +4,10 @@ const TIPO_LABELS = {
     'minore': 'Minore di 12 anni'
 };
 
-module.exports = { TIPO_LABELS };
+const LISTINO_PREZZI = {
+    adulto: 10.00,
+    ragazzo: 5.00,
+    minore: 0.00
+};
+
+module.exports = { TIPO_LABELS, LISTINO_PREZZI };
