@@ -229,11 +229,20 @@
     </div>
 
     <script>
-        // Leggi email dai parametri URL
+        // Leggi parametri dall'URL (email e event)
         const urlParams = new URLSearchParams(window.location.search);
         const email = urlParams.get('email');
+        const eventId = urlParams.get('event');
+
+        // Mostra email se presente
         if (email) {
             document.getElementById('userEmail').textContent = email;
+        }
+
+        // Aggiorna link registrazione con eventId
+        if (eventId) {
+            const regLink = document.querySelector('a.btn-primary');
+            regLink.href = `/registrazione/registrazione.html?event=${eventId}`;
         }
     </script>
 </body>

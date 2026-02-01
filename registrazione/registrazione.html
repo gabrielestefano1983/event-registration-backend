@@ -331,8 +331,8 @@
                         })
                     });
                     if (res.ok) {
-                        // Redirect alla pagina di successo con email
-                        window.location.href = `/registrazione/success.html?email=${encodeURIComponent(leaderData.email)}`;
+                        // Redirect alla pagina di successo con email e event
+                        window.location.href = `/registrazione/success.html?email=${encodeURIComponent(leaderData.email)}&event=${EVENT_ID}`;
                     } else {
                         alert('Si è verificato un errore. Contattaci se il problema persiste.');
                     }
