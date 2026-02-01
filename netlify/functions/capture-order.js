@@ -177,7 +177,8 @@ exports.handler = async (event) => {
                         TICKETS_HTML: ticketsHtml,
                         EMAIL_MITTENTE: evento.email_mittente,
                         NUM_BIGLIETTI: tickets.length,
-                        DATA_ORA_EVENTO: dataOraFormatted
+                        DATA_ORA_EVENTO: dataOraFormatted,
+                        INDIRIZZO_EVENTO: evento.indirizzo || ''
                     });
 
                     const emailRes = await resend.emails.send({

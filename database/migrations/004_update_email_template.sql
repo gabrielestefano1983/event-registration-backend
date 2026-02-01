@@ -60,6 +60,7 @@ SET email_body_template = '
     <div class="header">
         <h1>{{NOME_EVENTO}}</h1>
         <p class="event-date">📅 {{DATA_ORA_EVENTO}}</p>
+        <p class="event-location">📍 {{INDIRIZZO_EVENTO}}</p>
     </div>
     <div class="content">
         <p>Ciao <strong>{{NOME_PARTECIPANTE}}</strong>,</p>
@@ -86,6 +87,7 @@ WHERE id = 1;
 -- Questo template include:
 -- - {{NOME_EVENTO}} - Nome evento
 -- - {{DATA_ORA_EVENTO}} - Data e ora formattata (es: "15/06/2026 alle 19:00")
+-- - {{INDIRIZZO_EVENTO}} - Indirizzo/luogo dell'evento
 -- - {{NOME_PARTECIPANTE}} - Nome del primo partecipante
 -- - {{NUM_BIGLIETTI}} - Numero totale biglietti
 -- - {{TICKETS_HTML}} - HTML completo dei biglietti con QR code

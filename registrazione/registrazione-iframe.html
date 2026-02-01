@@ -146,11 +146,22 @@
                     });
 
                     const dateTimeEl = document.createElement('p');
-                    dateTimeEl.style.cssText = 'color: #666; margin: 10px 0 20px 0; font-size: 1.1rem; font-weight: 500;';
+                    dateTimeEl.style.cssText = 'color: #666; margin: 10px 0 5px 0; font-size: 1.1rem; font-weight: 500;';
                     dateTimeEl.innerHTML = `📅 ${dataFormatted} alle ${oraFormatted}`;
 
                     const desc = document.querySelector('h2').nextElementSibling;
                     desc.parentNode.insertBefore(dateTimeEl, desc.nextSibling);
+                }
+
+                // Mostra indirizzo evento
+                if (config.indirizzo) {
+                    const locationEl = document.createElement('p');
+                    locationEl.style.cssText = 'color: #666; margin: 5px 0 20px 0; font-size: 1.1rem; font-weight: 500;';
+                    locationEl.innerHTML = `📍 ${config.indirizzo}`;
+
+                    const desc = document.querySelector('h2').nextElementSibling;
+                    const lastInserted = desc.nextSibling;
+                    desc.parentNode.insertBefore(locationEl, lastInserted.nextSibling);
                 }
             }
 

@@ -57,6 +57,14 @@ Dove:
 - Design migliorato con data in evidenza
 - Mostra numero biglietti
 
+### `005_add_event_location.sql`
+**Data**: 2026-02-01  
+**Stato**: ⏳ Da applicare  
+**Descrizione**: Aggiunge campo indirizzo
+- Campo `indirizzo` TEXT in tabella `eventi`
+- Mostrato in pagine registrazione
+- Placeholder `{{INDIRIZZO_EVENTO}}` per email
+
 ## 🚀 Come Applicare Migrazioni
 
 ### In Ordine (Prima Installazione)
@@ -114,5 +122,5 @@ AND column_name = 'gratuito';
 
 ---
 
-**Ultima Migrazione**: 004  
-**Prossima Disponibile**: 005
+**Ultima Migrazione**: 005  
+**Prossima Disponibile**: 006

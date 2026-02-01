@@ -13,6 +13,9 @@ Nome del primo partecipante nella registrazione
 ### **{{DATA_ORA_EVENTO}}**
 Data e ora dell'evento formattata (es: "15/06/2026 alle 19:00")
 
+### **{{INDIRIZZO_EVENTO}}**
+Indirizzo/luogo dell'evento (es: "Via Example 123, Milano")
+
 ### **{{TICKETS_HTML}}**
 HTML completo con tutti i biglietti (già formattati con QR code)
 
