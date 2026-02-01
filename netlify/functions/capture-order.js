@@ -1,8 +1,7 @@
 const { supabase } = require('./utils/supabase');
 const { Resend } = require('resend');
 const QRCode = require('qrcode');
-const { getTicketsEmailHtml } = require('./utils/emailTemplate');
-const { LISTINO_PREZZI } = require('./utils/constants');
+const { getEventById, isEventValid, renderEmailTemplate, generateTicketsHtml } = require('./utils/eventHelpers');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const PAYPAL_API = 'https://api-m.sandbox.paypal.com';
@@ -11,15 +10,28 @@ exports.handler = async (event) => {
     try {
         console.log('--- START CAPTURE ORDER ---');
         const body = JSON.parse(event.body);
-        const { orderID, participants } = body;
+        const { orderID, participants, eventId } = body;
 
         console.log('Order ID:', orderID);
+        console.log('Event ID:', eventId);
         console.log('Participants:', participants.length);
 
-        if (!orderID || !participants) {
-            throw new Error('Missing orderID or participants');
+        if (!orderID || !participants || !eventId) {
+            throw new Error('Missing orderID, participants, or eventId');
         }
 
+        // Carica e valida evento
+        const { data: evento, error: eventoError } = await getEventById(eventId);
+        if (eventoError || !evento) {
+            throw new Error('Evento non trovato');
+        }
+
+        const validation = isEventValid(evento);
+        if (!validation.valid) {
+            throw new Error(`Evento non valido: ${validation.reason}`);
+        }
+
+        const listino = evento.listino_prezzi;
         const masterEmail = participants[0].email;
         const masterTelefono = participants[0].telefono || null;
 
@@ -82,7 +94,7 @@ exports.handler = async (event) => {
                     }
 
                     // C. Salvataggio DB (Network IO)
-                    const importo = LISTINO_PREZZI[p.tipo] || 0.00;
+                    const importo = listino[p.tipo] || 0.00;
                     const { error: dbError } = await supabase.from('registrations').insert([{
                         nome: p.nome,
                         email: p.email || masterEmail,
@@ -94,7 +106,8 @@ exports.handler = async (event) => {
                         numero_ordine_gruppo: numeroGruppo,
                         qr_token: qrToken,
                         note: p.note || null,
-                        email_inviata: false
+                        email_inviata: false,
+                        evento_id: eventId  // ← Salva l'evento
                     }]);
 
                     if (dbError) {
@@ -102,11 +115,15 @@ exports.handler = async (event) => {
                         return { status: 'error', error: dbError, name: p.nome };
                     }
 
+                    // Aggiungi tipo_label per email
+                    const tipoLabel = evento.tipo_labels[p.tipo] || p.tipo;
+
                     return {
                         status: 'ok',
                         ticket: {
                             nome: p.nome,
                             tipo: p.tipo,
+                            tipo_label: tipoLabel,
                             qrUrl: qrDataUrl,
                             qrToken: qrToken,
                             note: p.note,
@@ -127,16 +144,26 @@ exports.handler = async (event) => {
             const results = resultsRaw.map(r => ({ name: r.name, status: r.status, error: r.error }));
             const tickets = resultsRaw.filter(r => r.status === 'ok').map(r => r.ticket);
 
-            // Send Single Email
+            // Send Single Email with Custom Template
             if (tickets.length > 0) {
                 console.log(`Sending single email with ${tickets.length} tickets to ${masterEmail}...`);
                 try {
-                    const emailHtml = getTicketsEmailHtml(participants[0].nome, tickets);
+                    // Genera HTML dei biglietti
+                    const ticketsHtml = generateTicketsHtml(tickets);
+
+                    // Renderizza template custom dall'evento
+                    const emailHtml = renderEmailTemplate(evento.email_body_template, {
+                        NOME_EVENTO: evento.nome,
+                        NOME_PARTECIPANTE: participants[0].nome,
+                        TICKETS_HTML: ticketsHtml,
+                        EMAIL_MITTENTE: evento.email_mittente,
+                        NUM_BIGLIETTI: tickets.length
+                    });
 
                     const emailRes = await resend.emails.send({
-                        from: 'Loredoperlavita <info@loredoperlavita.it>',
+                        from: `${evento.email_mittente_nome} <${evento.email_mittente}>`,
                         to: masterEmail,
-                        subject: `I tuoi biglietti per l'evento (${tickets.length})`,
+                        subject: evento.email_oggetto.replace('{{NUM_BIGLIETTI}}', tickets.length),
                         html: emailHtml
                     });
 

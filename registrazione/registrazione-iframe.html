@@ -85,11 +85,53 @@
             ? 'http://localhost:8888/api'
             : 'https://poetic-phoenix-66e16b.netlify.app/api';
 
+        // Leggi eventId dall'URL (?event=123)
+        const urlParams = new URLSearchParams(window.location.search);
+        const EVENT_ID = urlParams.get('event');
+
+        // ⚠️ VALIDAZIONE: Blocca se manca eventId
+        if (!EVENT_ID) {
+            document.body.innerHTML = `
+                <div style="max-width: 600px; margin: 50px auto; padding: 30px; text-align: center; font-family: Arial, sans-serif;">
+                    <h1 style="color: #e53e3e;">⚠️ Parametro Mancante</h1>
+                    <p style="font-size: 18px; color: #4a5568; margin: 20px 0;">
+                        Per accedere alla registrazione è necessario specificare un evento valido.
+                    </p>
+                    <p style="color: #718096;">
+                        L'URL deve includere il parametro <code style="background: #f7fafc; padding: 2px 6px; border-radius: 4px;">?event=ID</code>
+                    </p>
+                    <p style="margin-top: 30px;">
+                        <strong>Esempio:</strong><br>
+                        <code style="background: #f7fafc; padding: 8px 12px; border-radius: 4px; display: inline-block; margin-top: 10px;">
+                            registrazione-iframe.html?event=1
+                        </code>
+                    </p>
+                </div>
+            `;
+            throw new Error('EventId mancante nell\'URL');
+        }
+
         // Carica configurazione PayPal dal server in modo sicuro
         async function loadPayPalSDK() {
-            const configRes = await fetch(`${API_BASE}/config`);
+            const configUrl = `${API_BASE}/config?event=${EVENT_ID}`;
+            const configRes = await fetch(configUrl);
+
+            if (!configRes.ok) {
+                const errorData = await configRes.json();
+                throw new Error(errorData.reason || errorData.error || 'Evento non disponibile');
+            }
+
             const config = await configRes.json();
-            window.evtConfig = config; // Store config globally (labels + prezzi)
+            window.evtConfig = config; // Store config globally (labels + prezzi + event info)
+
+            // Mostra nome evento se presente
+            if (config.nomeEvento && config.nomeEvento !== 'Registrazione') {
+                document.querySelector('h2').innerText = config.nomeEvento;
+                if (config.descrizione) {
+                    const desc = document.querySelector('h2').nextElementSibling;
+                    desc.innerText = config.descrizione;
+                }
+            }
 
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -106,7 +148,7 @@
             initApp();
         }).catch(err => {
             console.error('Errore caricamento PayPal SDK:', err);
-            alert('Errore nel caricamento del sistema di pagamento. Riprova più tardi.');
+            alert(err.message || 'Errore nel caricamento del sistema di pagamento. Riprova più tardi.');
         });
 
         function initApp() {
@@ -270,7 +312,10 @@
                     const res = await fetch(`${API_BASE}/create-order`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ participants: getFullData() })
+                        body: JSON.stringify({
+                            eventId: EVENT_ID,
+                            participants: getFullData()
+                        })
                     });
                     const order = await res.json();
                     return order.id;
@@ -279,7 +324,11 @@
                     const res = await fetch(`${API_BASE}/capture-order`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ orderID: data.orderID, participants: getFullData() })
+                        body: JSON.stringify({
+                            orderID: data.orderID,
+                            eventId: EVENT_ID,
+                            participants: getFullData()
+                        })
                     });
                     if (res.ok) {
                         // Redirect alla pagina di successo con email
