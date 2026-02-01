@@ -71,7 +71,7 @@ SET email_body_template = '
     </div>
     <div class="content">
         <p>Ciao <strong>{{NOME_PARTECIPANTE}}</strong>,</p>
-        <p>Grazie per la tua registrazione! Ecco i tuoi <strong>biglietti</strong> ({{NUM_BIGLIETTI}} in totale) :</p>
+        <p>Grazie per la tua registrazione! Ecco i tuoi <strong>biglietti</strong> ({{NUM_BIGLIETTI}} in totale):</p>
         {{TICKETS_HTML}}
         <p style="margin-top: 30px;">
             <strong>📱 All''ingresso dell''evento:</strong><br>
