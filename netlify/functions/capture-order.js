@@ -154,13 +154,30 @@ exports.handler = async (event) => {
                     // Genera HTML dei biglietti
                     const ticketsHtml = generateTicketsHtml(tickets);
 
+                    // Formatta data e ora evento per email
+                    let dataOraFormatted = '';
+                    if (evento.data_ora_evento) {
+                        const dataEvento = new Date(evento.data_ora_evento);
+                        const dataStr = dataEvento.toLocaleDateString('it-IT', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        });
+                        const oraStr = dataEvento.toLocaleTimeString('it-IT', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        dataOraFormatted = `${dataStr} alle ${oraStr}`;
+                    }
+
                     // Renderizza template custom dall'evento
                     const emailHtml = renderEmailTemplate(evento.email_body_template, {
                         NOME_EVENTO: evento.nome,
                         NOME_PARTECIPANTE: participants[0].nome,
                         TICKETS_HTML: ticketsHtml,
                         EMAIL_MITTENTE: evento.email_mittente,
-                        NUM_BIGLIETTI: tickets.length
+                        NUM_BIGLIETTI: tickets.length,
+                        DATA_ORA_EVENTO: dataOraFormatted
                     });
 
                     const emailRes = await resend.emails.send({
