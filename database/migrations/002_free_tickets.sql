@@ -43,23 +43,29 @@ CHECK (
 -- ================================================
 
 -- Come funziona:
--- - gratuito=false → Biglietto normale, segue listino prezzi
--- - gratuito=true  → Biglietto gratis, importo_pagato=0, pagato=true
+-- - gratuito=false → Biglietto normale da PayPal
+-- - gratuito=true  → Biglietto omaggio inserito MANUALMENTE via SQL
 --
--- Quando creare ticket gratuiti:
+-- ⚠️ IMPORTANTE: Il campo gratuito NON è gestito dal backend
+--    Tutti i ticket creati via PayPal hanno SEMPRE gratuito=false
+--    Solo gli inserimenti MANUALI tramite SQL possono impostare gratuito=true
+--
+-- Quando creare ticket gratuiti MANUALMENTE:
 -- - Amici / Family
 -- - Staff / Volontari
 -- - Premi / Giveaway
 -- - Sponsor VIP
 --
--- Backend deve:
--- - Saltare calcolo prezzo se gratuito=true
--- - Impostare importo_pagato=0
--- - Impostare pagato=true (non serve PayPal)
+-- Esempio inserimento manuale:
+-- INSERT INTO registrations (nome, email, telefono, tipo_partecipante,
+--     importo_pagato, pagato, qr_token, evento_id, gratuito)
+-- VALUES ('Mario Rossi', 'mario@test.com', '123', 'adulto',
+--     0.00, true, 'manual-' || gen_random_uuid(), 1, true);
 --
--- Frontend deve:
--- - Mostrare "GRATUITO" invece del prezzo
--- - Potrebbe avere checkbox "Registrazione gratuita" (admin only)
+-- Email Template:
+-- - Il sistema legge il campo gratuito dal database
+-- - Se gratuito=true, mostra badge "🎟️ GRATUITO" verde
+-- - Se gratuito=false, mostra importo normale
 
 -- ================================================
 -- END MIGRATION 002
