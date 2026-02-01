@@ -77,8 +77,7 @@ exports.handler = async (event) => {
                 eventId: evento.id,
                 nomeEvento: evento.nome,
                 descrizione: evento.descrizione,
-                dataInizio: evento.data_inizio,
-                dataFine: evento.data_fine
+                dataOraEvento: evento.data_ora_evento
             })
         };
 

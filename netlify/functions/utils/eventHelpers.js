@@ -16,7 +16,7 @@ async function getEventById(eventId) {
 }
 
 /**
- * Verifica se un evento è valido (attivo e dentro range di date)
+ * Verifica se un evento è valido (attivo)
  * @param {object} evento - Oggetto evento dal DB
  * @returns {{valid: boolean, reason?: string}}
  */
@@ -27,24 +27,6 @@ function isEventValid(evento) {
 
     if (!evento.attivo) {
         return { valid: false, reason: 'Evento non attivo' };
-    }
-
-    const now = new Date();
-    const dataInizio = new Date(evento.data_inizio);
-    const dataFine = new Date(evento.data_fine);
-
-    if (now < dataInizio) {
-        return {
-            valid: false,
-            reason: `L'evento non è ancora iniziato. Disponibile dal ${dataInizio.toLocaleDateString('it-IT')}`
-        };
-    }
-
-    if (now > dataFine) {
-        return {
-            valid: false,
-            reason: `L'evento è terminato il ${dataFine.toLocaleDateString('it-IT')}`
-        };
     }
 
     return { valid: true };

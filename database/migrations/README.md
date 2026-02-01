@@ -40,6 +40,15 @@ Dove:
 - Constraint validazione importo
 - Indice per performance
 
+### `003_simplify_event_dates.sql`
+**Data**: 2026-02-01  
+**Stato**: ⏳ Da applicare  
+**Descrizione**: Semplifica gestione date
+- Elimina `data_inizio` e `data_fine`
+- Aggiunge `data_ora_evento` (timestamp singolo)
+- Validazione eventi ora basata solo su `attivo`
+- Data/ora mostrata nella pagina di registrazione
+
 ## 🚀 Come Applicare Migrazioni
 
 ### In Ordine (Prima Installazione)
@@ -97,5 +106,5 @@ AND column_name = 'gratuito';
 
 ---
 
-**Ultima Migrazione**: 002  
-**Prossima Disponibile**: 003
+**Ultima Migrazione**: 003  
+**Prossima Disponibile**: 004

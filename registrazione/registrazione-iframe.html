@@ -131,6 +131,27 @@
                     const desc = document.querySelector('h2').nextElementSibling;
                     desc.innerText = config.descrizione;
                 }
+
+                // Mostra data e ora evento
+                if (config.dataOraEvento) {
+                    const dataEvento = new Date(config.dataOraEvento);
+                    const dataFormatted = dataEvento.toLocaleDateString('it-IT', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                    const oraFormatted = dataEvento.toLocaleTimeString('it-IT', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    const dateTimeEl = document.createElement('p');
+                    dateTimeEl.style.cssText = 'color: #666; margin: 10px 0 20px 0; font-size: 1.1rem; font-weight: 500;';
+                    dateTimeEl.innerHTML = `📅 ${dataFormatted} alle ${oraFormatted}`;
+
+                    const desc = document.querySelector('h2').nextElementSibling;
+                    desc.parentNode.insertBefore(dateTimeEl, desc.nextSibling);
+                }
             }
 
             return new Promise((resolve, reject) => {
