@@ -178,30 +178,27 @@ ORDER BY ora;
 SELECT 
     id,
     nome,
-    data_inizio,
-    data_fine,
+    data_ora_evento,
     attivo,
     (SELECT COUNT(*) FROM registrations WHERE evento_id = eventi.id) as totale_registrazioni
 FROM eventi
 WHERE attivo = true
-AND data_fine >= NOW()
-ORDER BY data_inizio;
+ORDER BY data_ora_evento;
 ```
 
-### Eventi Scaduti da Disattivare
+### Disattiva Manualmente un Evento
 ```sql
 UPDATE eventi
 SET attivo = false
-WHERE data_fine < NOW()
-AND attivo = true
-RETURNING id, nome, data_fine;
+WHERE id = 1
+RETURNING id, nome, data_ora_evento;
 ```
 
 ### Clonare un Evento
 ```sql
 INSERT INTO eventi (
     nome, slug, descrizione, 
-    data_inizio, data_fine,
+    data_ora_evento,
     listino_prezzi, tipo_labels,
     email_mittente, email_mittente_nome,
     email_oggetto, email_body_template,
@@ -211,8 +208,7 @@ SELECT
     nome || ' - Copia',
     slug || '-copy',
     descrizione,
-    '2026-06-01 00:00:00+00',  -- Nuova data inizio
-    '2026-06-30 23:59:59+00',  -- Nuova data fine
+    '2026-06-15 19:00:00+00',  -- Nuova data e ora
     listino_prezzi,
     tipo_labels,
     email_mittente,
@@ -294,8 +290,7 @@ tipo_breakdown AS (
 )
 SELECT 
     e.nome as evento,
-    e.data_inizio,
-    e.data_fine,
+    e.data_ora_evento,
     s.totale_ticket,
     s.ticket_pagati,
     s.ticket_gratuiti,
