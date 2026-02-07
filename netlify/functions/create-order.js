@@ -1,6 +1,8 @@
 const { getEventById, isEventValid } = require('./utils/eventHelpers');
 
-const PAYPAL_API = 'https://api-m.sandbox.paypal.com'; // In produzione togli .sandbox
+const PAYPAL_API = process.env.PAYPAL_MODE === 'live'
+    ? 'https://api-m.paypal.com'
+    : 'https://api-m.sandbox.paypal.com';
 
 exports.handler = async (event) => {
     if (event.httpMethod !== "POST") return { statusCode: 405 };

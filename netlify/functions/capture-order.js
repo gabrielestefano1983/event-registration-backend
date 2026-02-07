@@ -4,7 +4,9 @@ const QRCode = require('qrcode');
 const { getEventById, isEventValid, renderEmailTemplate, generateTicketsHtml } = require('./utils/eventHelpers');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const PAYPAL_API = 'https://api-m.sandbox.paypal.com';
+const PAYPAL_API = process.env.PAYPAL_MODE === 'live'
+    ? 'https://api-m.paypal.com'
+    : 'https://api-m.sandbox.paypal.com';
 
 exports.handler = async (event) => {
     try {
