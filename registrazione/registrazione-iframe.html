@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrazione Evento</title>
+    <title></title>
 </head>
 
 <body style="margin: 0; padding: 0; background-color: transparent;">
@@ -15,7 +15,6 @@
         <div style="background: #f8f9fa; padding: 25px; border-bottom: 1px solid #eee;">
             <h2 style="margin: 0; color: #1a1a1a; font-size: 1.6rem; letter-spacing: -0.5px;">Registrazione Evento</h2>
             <p style="margin: 8px 0 0; color: #666; font-size: 0.95rem; line-height: 1.4;">
-                Il referente (Capogruppo) riceverà tutti i biglietti via email.
             </p>
         </div>
 
@@ -28,11 +27,11 @@
                     🟢 Capogruppo / Referente (Obbligatorio)
                 </span>
                 <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
-                    <input type="text" id="leader-name" placeholder="Nome e Cognome completo" value=""
+                    <input type="text" id="leader-name" placeholder="Nome e Cognome completo *" value=""
                         style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box;">
 
                     <div>
-                        <input type="email" id="leader-email" placeholder="Email per ricevere i biglietti" value=""
+                        <input type="email" id="leader-email" placeholder="Email per ricevere i biglietti *" value=""
                             style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;">
                         <div id="email-error"
                             style="color: #e53e3e; font-size: 0.75rem; margin-top: 5px; display: none; font-weight: 600;">
@@ -312,6 +311,23 @@
 
             window.removeExtra = (i) => { extraParticipants.splice(i, 1); renderExtras(); };
             document.getElementById('add-btn').onclick = () => {
+                // Controllo campi capogruppo prima di aggiungere altri
+                if (!leaderData.nome || leaderData.nome.trim() === '') {
+                    alert("Per favore, inserisci prima il Nome e Cognome del Capogruppo.");
+                    document.getElementById('leader-name').focus();
+                    return;
+                }
+                if (!leaderData.email || !validateEmailFormat(leaderData.email)) {
+                    alert("Per favore, inserisci una Email valida per il Capogruppo.");
+                    document.getElementById('leader-email').focus();
+                    return;
+                }
+                if (!leaderData.telefono || leaderData.telefono.trim() === '') {
+                    alert("Per favore, inserisci il Numero di telefono del Capogruppo.");
+                    document.getElementById('leader-telefono').focus();
+                    return;
+                }
+
                 extraParticipants.push({ nome: '', tipo: 'adulto', note: '' });
                 renderExtras();
             };
