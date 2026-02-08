@@ -22,6 +22,20 @@ exports.handler = async (event) => {
             throw new Error('Missing orderID, participants, or eventId');
         }
 
+        // VALIDAZIONE DATI (Difesa in profondità)
+        const leader = participants[0];
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!leader.nome || !leader.nome.trim()) throw new Error('Nome del Capogruppo obbligatorio');
+        if (!leader.email || !emailRegex.test(leader.email)) throw new Error('Email del Capogruppo non valida');
+        if (!leader.telefono || !leader.telefono.trim()) throw new Error('Telefono del Capogruppo obbligatorio');
+
+        for (let i = 1; i < participants.length; i++) {
+            if (!participants[i].nome || !participants[i].nome.trim()) {
+                throw new Error(`Nome mancante per il partecipante #${i + 1}`);
+            }
+        }
+
         // Carica e valida evento
         const { data: evento, error: eventoError } = await getEventById(eventId);
         if (eventoError || !evento) {

@@ -10,12 +10,40 @@ exports.handler = async (event) => {
     try {
         const { eventId, participants } = JSON.parse(event.body);
 
-        // Validazione eventId
+        // Validazione input base
         if (!eventId) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({ error: 'EventId mancante' })
             };
+        }
+
+        if (!participants || !Array.isArray(participants) || participants.length === 0) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: 'Dati partecipanti mancanti' })
+            };
+        }
+
+        // Validazione Capogruppo
+        const leader = participants[0];
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!leader.nome || !leader.nome.trim()) {
+            return { statusCode: 400, body: JSON.stringify({ error: 'Nome del Capogruppo obbligatorio' }) };
+        }
+        if (!leader.email || !emailRegex.test(leader.email)) {
+            return { statusCode: 400, body: JSON.stringify({ error: 'Email del Capogruppo non valida' }) };
+        }
+        if (!leader.telefono || !leader.telefono.trim()) {
+            return { statusCode: 400, body: JSON.stringify({ error: 'Telefono del Capogruppo obbligatorio' }) };
+        }
+
+        // Validazione Partecipanti Extra
+        for (let i = 1; i < participants.length; i++) {
+            if (!participants[i].nome || !participants[i].nome.trim()) {
+                return { statusCode: 400, body: JSON.stringify({ error: `Nome mancante per il partecipante #${i + 1}` }) };
+            }
         }
 
         // Carica e valida evento
