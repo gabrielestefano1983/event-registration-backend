@@ -313,17 +313,17 @@
             document.getElementById('add-btn').onclick = () => {
                 // Controllo campi capogruppo prima di aggiungere altri
                 if (!leaderData.nome || leaderData.nome.trim() === '') {
-                    alert("Per favore, inserisci prima il Nome e Cognome del Capogruppo.");
+                    showValidationError("Per favore, inserisci prima il Nome e Cognome del Capogruppo.");
                     document.getElementById('leader-name').focus();
                     return;
                 }
                 if (!leaderData.email || !validateEmailFormat(leaderData.email)) {
-                    alert("Per favore, inserisci una Email valida per il Capogruppo.");
+                    showValidationError("Per favore, inserisci una Email valida per il Capogruppo.");
                     document.getElementById('leader-email').focus();
                     return;
                 }
                 if (!leaderData.telefono || leaderData.telefono.trim() === '') {
-                    alert("Per favore, inserisci il Numero di telefono del Capogruppo.");
+                    showValidationError("Per favore, inserisci il Numero di telefono del Capogruppo.");
                     document.getElementById('leader-telefono').focus();
                     return;
                 }
@@ -337,17 +337,33 @@
                 return [leaderData, ...extraParticipants];
             }
 
+            function showValidationError(msg) {
+                let errDiv = document.getElementById('global-error-msg');
+                if (!errDiv) {
+                    errDiv = document.createElement('div');
+                    errDiv.id = 'global-error-msg';
+                    errDiv.style.cssText = "position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#e53e3e; color:white; padding:15px; border-radius:8px; z-index:9999; box-shadow:0 4px 6px rgba(0,0,0,0.1); font-weight:bold; width: 90%; max-width: 400px; text-align: center;";
+                    document.body.appendChild(errDiv);
+                }
+                errDiv.innerText = msg;
+                errDiv.style.display = 'block';
+                setTimeout(() => { errDiv.style.display = 'none'; }, 5000);
+            }
+
             function validateAll() {
                 if (!leaderData.nome || !leaderData.email || !validateEmailFormat(leaderData.email)) {
-                    alert("Dati Capogruppo mancanti o email non valida!");
+                    showValidationError("Dati Capogruppo mancanti o email non valida!");
                     return false;
                 }
                 if (!leaderData.telefono || leaderData.telefono.trim() === '') {
-                    alert("Il numero di telefono del Capogruppo è obbligatorio!");
+                    showValidationError("Il numero di telefono del Capogruppo è obbligatorio!");
                     return false;
                 }
                 for (let p of extraParticipants) {
-                    if (!p.nome) { alert("Inserisci il nome di tutti i partecipanti extra."); return false; }
+                    if (!p.nome) {
+                        showValidationError("Inserisci il nome di tutti i partecipanti extra.");
+                        return false;
+                    }
                 }
                 return true;
             }
@@ -388,7 +404,7 @@
                         // Redirect alla pagina di successo con email e event
                         window.location.href = `/registrazione/success.html?email=${encodeURIComponent(leaderData.email)}&event=${EVENT_ID}`;
                     } else {
-                        alert('Si è verificato un errore. Contattaci se il problema persiste.');
+                        showValidationError('Si è verificato un errore. Contattaci se il problema persiste.');
                     }
                 }
             }).render('#paypal-button-container');
