@@ -342,12 +342,48 @@
                 if (!errDiv) {
                     errDiv = document.createElement('div');
                     errDiv.id = 'global-error-msg';
-                    errDiv.style.cssText = "position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#e53e3e; color:white; padding:15px; border-radius:8px; z-index:9999; box-shadow:0 4px 6px rgba(0,0,0,0.1); font-weight:bold; width: 90%; max-width: 400px; text-align: center;";
+                    // Modal backdrop
+                    errDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; display:none; justify-content:center; align-items:center;";
+
+                    // Modal content
+                    const contentDiv = document.createElement('div');
+                    contentDiv.style.cssText = "background:white; padding:30px; border-radius:12px; width:90%; max-width:400px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2); font-family:inherit; animation: fadeIn 0.2s ease-out;";
+
+                    // Icon
+                    const icon = document.createElement('div');
+                    icon.innerHTML = '<span style="display:inline-block; background:#fff5f5; color:#fc8181; width:60px; height:60px; line-height:60px; border-radius:50%; font-size:30px;">⚠️</span>';
+                    icon.style.cssText = "margin-bottom:20px;";
+                    contentDiv.appendChild(icon);
+
+                    // Message text
+                    const msgP = document.createElement('p');
+                    msgP.id = 'global-error-text';
+                    msgP.style.cssText = "margin:0 0 25px 0; color:#2d3748; font-size:1.1rem; line-height:1.5; font-weight:600;";
+                    contentDiv.appendChild(msgP);
+
+                    // Close button
+                    const closeBtn = document.createElement('button');
+                    closeBtn.innerText = 'OK, ho capito';
+                    closeBtn.style.cssText = "width:100%; padding:14px; background:#38a169; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:1rem; transition: transform 0.1s;";
+                    closeBtn.onclick = () => { errDiv.style.display = 'none'; };
+                    contentDiv.appendChild(closeBtn);
+
+                    errDiv.appendChild(contentDiv);
                     document.body.appendChild(errDiv);
+
+                    // Close on click outside
+                    errDiv.onclick = (e) => {
+                        if (e.target === errDiv) errDiv.style.display = 'none';
+                    };
+
+                    // Add animation keyframes
+                    const style = document.createElement('style');
+                    style.innerHTML = `@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }`;
+                    document.head.appendChild(style);
                 }
-                errDiv.innerText = msg;
-                errDiv.style.display = 'block';
-                setTimeout(() => { errDiv.style.display = 'none'; }, 5000);
+                const textEl = document.getElementById('global-error-text');
+                if (textEl) textEl.innerText = msg;
+                errDiv.style.display = 'flex';
             }
 
             function validateAll() {
