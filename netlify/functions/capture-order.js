@@ -177,11 +177,13 @@ exports.handler = async (event) => {
                         const dataStr = dataEvento.toLocaleDateString('it-IT', {
                             day: '2-digit',
                             month: '2-digit',
-                            year: 'numeric'
+                            year: 'numeric',
+                            timeZone: 'Europe/Rome'
                         });
                         const oraStr = dataEvento.toLocaleTimeString('it-IT', {
                             hour: '2-digit',
-                            minute: '2-digit'
+                            minute: '2-digit',
+                            timeZone: 'Europe/Rome'
                         });
                         dataOraFormatted = `${dataStr} alle ${oraStr}`;
                     }
