@@ -355,8 +355,14 @@
             // PAYPAL
             paypal.Buttons({
                 fundingSource: paypal.FUNDING.PAYPAL,
+                onClick: (data, actions) => {
+                    const isValid = validateAll();
+                    if (!isValid) {
+                        return actions.reject();
+                    }
+                    return actions.resolve();
+                },
                 createOrder: async (data, actions) => {
-                    if (!validateAll()) return actions.reject();
                     const res = await fetch(`${API_BASE}/create-order`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
