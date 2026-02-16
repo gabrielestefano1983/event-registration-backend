@@ -9,8 +9,32 @@
 
 <body style="margin: 0; padding: 0; background-color: transparent;">
 
+    <!-- Loading Modal -->
+    <div id="loading-modal"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+        <div
+            style="width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #3182ce; border-radius: 50%; animation: spin 1s linear infinite;">
+        </div>
+        <p
+            style="margin-top: 20px; font-size: 1.2rem; color: #2d3748; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            Caricamento...</p>
+    </div>
+
+    <style>
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
     <div id="event-reg-root"
-        style="max-width: 600px; margin: 20px auto; padding-bottom: 150px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; border: 1px solid #e1e1e1; border-radius: 12px; background: #ffffff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden;">
+        style="max-width: 600px; margin: 20px auto; padding-bottom: 150px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; border: 1px solid #e1e1e1; border-radius: 12px; background: #ffffff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; display: none;">
+        <!-- Hidden initially to avoid flickering -->
 
         <div style="background: #f8f9fa; padding: 25px; border-bottom: 1px solid #eee;">
             <h2 style="margin: 0; color: #1a1a1a; font-size: 1.6rem; letter-spacing: -0.5px;">Registrazione Evento</h2>
@@ -89,6 +113,7 @@
 
         // ⚠️ VALIDAZIONE: Blocca se manca eventId
         if (!EVENT_ID) {
+            document.getElementById('loading-modal').style.display = 'none'; // Hide modal if error
             document.body.innerHTML = `
                 <div style="max-width: 600px; margin: 50px auto; padding: 30px; text-align: center; font-family: Arial, sans-serif;">
                     <h1 style="color: #e53e3e;">⚠️ Parametro Mancante</h1>
@@ -176,8 +201,12 @@
         loadPayPalSDK().then(() => {
             window.scrollTo(0, 0); // Force scroll to top
             initApp();
+            // Hide modal and show content
+            document.getElementById('loading-modal').style.display = 'none';
+            document.getElementById('event-reg-root').style.display = 'block';
         }).catch(err => {
             console.error('Errore caricamento PayPal SDK:', err);
+            document.getElementById('loading-modal').style.display = 'none'; // Hide loading
             alert(err.message || 'Errore nel caricamento del sistema di pagamento. Riprova più tardi.');
         });
 
