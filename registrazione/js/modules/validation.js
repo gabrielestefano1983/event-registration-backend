@@ -5,7 +5,7 @@ export const Validation = {
 
     validateLeader(leaderData) {
         if (!leaderData.nome || !leaderData.nome.trim()) {
-            return { valid: false, error: "Per favore, inserisci il Nome e Cognome del Capogruppo.", field: 'leader-name' };
+            return { valid: false, error: "Per favore, inserisci il Nome e Cognome del Capogruppo.", field: 'leader-nome' };
         }
         if (!leaderData.email || !this.isValidEmail(leaderData.email)) {
             return { valid: false, error: "Per favore, inserisci una Email valida per il Capogruppo.", field: 'leader-email' };
