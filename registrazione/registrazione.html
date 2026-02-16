@@ -4,478 +4,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>Registrazione Evento</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body style="margin: 0; padding: 0; background-color: transparent;">
+<body>
 
     <!-- Loading Modal -->
-    <div id="loading-modal"
-        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); z-index: 10000; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 20vh; align-items: center; backdrop-filter: blur(5px);">
-        <div
-            style="width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #3182ce; border-radius: 50%; animation: spin 1s linear infinite;">
-        </div>
-        <p
-            style="margin-top: 20px; font-size: 1.2rem; color: #2d3748; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-            Caricamento...</p>
+    <div id="loading-modal">
+        <div class="spinner"></div>
+        <p class="loading-text">Caricamento...</p>
     </div>
 
-    <style>
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
-
-    <div id="event-reg-root"
-        style="max-width: 600px; margin: 20px auto; padding-bottom: 150px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; border: 1px solid #e1e1e1; border-radius: 12px; background: #ffffff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; display: none;">
+    <div id="event-reg-root">
         <!-- Hidden initially to avoid flickering -->
 
-        <div style="background: #f8f9fa; padding: 25px; border-bottom: 1px solid #eee;">
-            <h2 style="margin: 0; color: #1a1a1a; font-size: 1.6rem; letter-spacing: -0.5px;">Registrazione Evento</h2>
-            <p style="margin: 8px 0 0; color: #666; font-size: 0.95rem; line-height: 1.4;">
-            </p>
+        <div class="header-section">
+            <h2>Registrazione Evento</h2>
+            <p><!-- Description will be loaded here --></p>
         </div>
 
-        <div style="padding: 25px;">
+        <div class="content-section">
 
-            <div id="leader-section"
-                style="padding: 20px; border: 2px solid #3182ce; border-radius: 12px; background: #ebf8ff; margin-bottom: 25px;">
-                <span
-                    style="font-weight: 800; font-size: 0.75rem; color: #3182ce; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 12px;">
+            <div id="leader-section">
+                <span class="section-label">
                     🟢 Capogruppo / Referente (Obbligatorio)
                 </span>
-                <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
-                    <input type="text" id="leader-name" placeholder="Nome e Cognome completo *" value=""
-                        style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box;">
+                <div class="input-grid">
+                    <input type="text" id="leader-name" placeholder="Nome e Cognome completo *">
 
                     <div>
-                        <input type="email" id="leader-email" placeholder="Email per ricevere i biglietti *" value=""
-                            style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;">
-                        <div id="email-error"
-                            style="color: #e53e3e; font-size: 0.75rem; margin-top: 5px; display: none; font-weight: 600;">
+                        <input type="email" id="leader-email" placeholder="Email per ricevere i biglietti *">
+                        <div id="email-error" class="error-msg">
                             Inserisci un indirizzo email valido.</div>
                     </div>
 
-                    <input type="tel" id="leader-telefono" placeholder="Numero di telefono *" required value=""
-                        style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box;">
+                    <input type="tel" id="leader-telefono" placeholder="Numero di telefono *" required>
 
-                    <textarea id="leader-note" placeholder="Note (allergie, esigenze speciali - opzionale)"
-                        style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box; resize:vertical; min-height:60px; font-family:inherit;"></textarea>
+                    <textarea id="leader-note" placeholder="Note (allergie, esigenze speciali - opzionale)"></textarea>
 
-                    <div id="leader-ticket-label"
-                        style="font-size: 0.9rem; color: #2c5282; font-weight: 700; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #bee3f8;">
+                    <div id="leader-ticket-label">
                         Biglietto: Maggiore 18 anni (€10.00)
                     </div>
                 </div>
             </div>
 
-            <h4
-                style="margin: 0 0 15px; color: #4a5568; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                Altri Partecipanti</h4>
+            <h4 class="extras-title">Altri Partecipanti</h4>
 
             <div id="extras-list"></div>
 
-            <button type="button" id="add-btn"
-                style="width: 100%; padding: 14px; margin-top: 10px; background: #fff; border: 2px dashed #cbd5e0; border-radius: 10px; color: #4a5568; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.95rem;">
+            <button type="button" id="add-btn">
                 + Aggiungi un altro partecipante
             </button>
 
             <!-- Sticky Footer Implementation -->
-            <div id="sticky-footer"
-                style="position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #e2e8f0; padding: 15px; box-shadow: 0 -4px 6px rgba(0,0,0,0.05); z-index: 100;">
-                <div style="max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: 700; color: #4a5568;">TOTALE DA PAGARE</span>
-                        <div id="total-display" style="font-size: 1.5rem; font-weight: 900; color: #2d3748;">10.00€
-                        </div>
+            <div id="sticky-footer">
+                <div class="footer-content">
+                    <div class="total-row">
+                        <span class="total-label">TOTALE DA PAGARE</span>
+                        <div id="total-display">10.00€</div>
                     </div>
-                    <div id="paypal-button-container" style="min-height: 45px;"></div>
+                    <div id="paypal-button-container"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Auto-detect locale vs produzione
-        const API_BASE = window.location.hostname === 'localhost'
-            ? 'http://localhost:8888/api'
-            : 'https://poetic-phoenix-66e16b.netlify.app/api';
-
-        // Leggi eventId dall'URL (?event=123)
-        const urlParams = new URLSearchParams(window.location.search);
-        const EVENT_ID = urlParams.get('event');
-
-        // ⚠️ VALIDAZIONE: Blocca se manca eventId
-        if (!EVENT_ID) {
-            document.getElementById('loading-modal').style.display = 'none'; // Hide modal if error
-            document.body.innerHTML = `
-                <div style="max-width: 600px; margin: 50px auto; padding: 30px; text-align: center; font-family: Arial, sans-serif;">
-                    <h1 style="color: #e53e3e;">⚠️ Parametro Mancante</h1>
-                    <p style="font-size: 18px; color: #4a5568; margin: 20px 0;">
-                        Per accedere alla registrazione è necessario specificare un evento valido.
-                    </p>
-                    <p style="color: #718096;">
-                        L'URL deve includere il parametro <code style="background: #f7fafc; padding: 2px 6px; border-radius: 4px;">?event=ID</code>
-                    </p>
-                    <p style="margin-top: 30px;">
-                        <strong>Esempio:</strong><br>
-                        <code style="background: #f7fafc; padding: 8px 12px; border-radius: 4px; display: inline-block; margin-top: 10px;">
-                            registrazione.html?event=1
-                        </code>
-                    </p>
-                </div>
-            `;
-            throw new Error('EventId mancante nell\'URL');
-        }
-
-        // Carica configurazione PayPal dal server in modo sicuro
-        async function loadPayPalSDK() {
-            const configUrl = `${API_BASE}/config?event=${EVENT_ID}`;
-            const configRes = await fetch(configUrl);
-
-            if (!configRes.ok) {
-                const errorData = await configRes.json();
-                throw new Error(errorData.reason || errorData.error || 'Evento non disponibile');
-            }
-
-            const config = await configRes.json();
-            window.evtConfig = config; // Store config globally (labels + prezzi + event info)
-
-            // Mostra nome evento se presente
-            if (config.nomeEvento && config.nomeEvento !== 'Registrazione') {
-                document.querySelector('h2').innerText = config.nomeEvento;
-                if (config.descrizione) {
-                    const desc = document.querySelector('h2').nextElementSibling;
-                    desc.innerText = config.descrizione;
-                }
-
-                // Mostra data e ora evento
-                if (config.dataOraEvento) {
-                    const dataEvento = new Date(config.dataOraEvento);
-                    const dataFormatted = dataEvento.toLocaleDateString('it-IT', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    });
-                    const oraFormatted = dataEvento.toLocaleTimeString('it-IT', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-
-                    const dateTimeEl = document.createElement('p');
-                    dateTimeEl.style.cssText = 'color: #666; margin: 10px 0 5px 0; font-size: 1.1rem; font-weight: 500;';
-                    dateTimeEl.innerHTML = `📅 ${dataFormatted} alle ${oraFormatted}`;
-
-                    const desc = document.querySelector('h2').nextElementSibling;
-                    desc.parentNode.insertBefore(dateTimeEl, desc.nextSibling);
-                }
-
-                // Mostra indirizzo evento
-                if (config.indirizzo) {
-                    const locationEl = document.createElement('p');
-                    locationEl.style.cssText = 'color: #666; margin: 5px 0 20px 0; font-size: 1.1rem; font-weight: 500;';
-                    locationEl.innerHTML = `📍 ${config.indirizzo}`;
-
-                    const desc = document.querySelector('h2').nextElementSibling;
-                    const lastInserted = desc.nextSibling;
-                    desc.parentNode.insertBefore(locationEl, lastInserted.nextSibling);
-                }
-            }
-
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = `https://www.paypal.com/sdk/js?client-id=${config.paypalClientId}&currency=${config.currency}`;
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-        }
-
-        // Inizializza l'app dopo aver caricato PayPal SDK
-        loadPayPalSDK().then(() => {
-            window.scrollTo(0, 0); // Force scroll to top
-            initApp();
-            // Hide modal and show content
-            document.getElementById('loading-modal').style.display = 'none';
-            document.getElementById('event-reg-root').style.display = 'block';
-        }).catch(err => {
-            console.error('Errore caricamento PayPal SDK:', err);
-            document.getElementById('loading-modal').style.display = 'none'; // Hide loading
-            alert(err.message || 'Errore nel caricamento del sistema di pagamento. Riprova più tardi.');
-        });
-
-        function initApp() {
-            // Stato dell'applicazione - con valori di default per testing
-            let leaderData = {
-                nome: '',
-                email: '',
-                telefono: '',
-                note: '',
-                tipo: 'adulto'
-            };
-            let extraParticipants = []; // Solo gli altri
-
-            const extrasListEl = document.getElementById('extras-list');
-            const totalEl = document.getElementById('total-display');
-            const paypalContainer = document.getElementById('paypal-button-container');
-
-            // Utility Validazione Email
-            function validateEmailFormat(email) {
-                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase().trim());
-            }
-
-            // Calcola e aggiorna il totale
-            function updateTotal() {
-                const prezzi = window.evtConfig?.prezzi || { adulto: 10, ragazzo: 5, minore: 0 };
-                let totale = prezzi.adulto; // Il leader è sempre adulto
-                extraParticipants.forEach(p => { totale += prezzi[p.tipo]; });
-                totalEl.innerText = totale.toFixed(2) + '€';
-            }
-
-            // Aggiorna etichetta capogruppo (solo visiva)
-            if (window.evtConfig && window.evtConfig.tipoLabels) {
-                const lLabel = window.evtConfig.tipoLabels['adulto'] || 'Maggiore 18 anni';
-                const lPrice = (window.evtConfig.prezzi?.adulto || 10).toFixed(2);
-                const el = document.getElementById('leader-ticket-label');
-                if (el) el.innerText = `Biglietto: ${lLabel} (€${lPrice})`;
-            }
-
-            // Renderizza solo i partecipanti extra (così non tocchiamo il leader)
-            function renderExtras() {
-                extrasListEl.innerHTML = '';
-                const labels = window.evtConfig && window.evtConfig.tipoLabels ? window.evtConfig.tipoLabels : {
-                    'adulto': 'Maggiore 18 anni',
-                    'ragazzo': 'Tra 12 e 18 anni',
-                    'minore': 'Minore 12 anni'
-                };
-                const prezzi = window.evtConfig?.prezzi || { adulto: 10, ragazzo: 5, minore: 0 };
-
-                extraParticipants.forEach((p, i) => {
-                    const div = document.createElement('div');
-                    // Stile "Card" simile al Capogruppo ma con colori neutri/distinti
-                    div.style = "position: relative; margin-bottom: 20px; padding: 20px; border: 2px solid #cbd5e0; border-radius: 12px; background: #fff;";
-
-                    // Genera opzioni dinamicamente
-                    const optionsHtml = Object.keys(prezzi).map(k => {
-                        const label = labels[k] || k;
-                        const price = prezzi[k] === 0 ? 'Gratis' : `€${prezzi[k].toFixed(2)}`;
-                        return `<option value="${k}" ${p.tipo === k ? 'selected' : ''}>${label} (${price})</option>`;
-                    }).join('');
-
-                    div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <span style="font-weight: 800; font-size: 0.75rem; color: #4a5568; text-transform: uppercase; letter-spacing: 1px;">
-                            👤 Partecipante #${i + 2}
-                        </span>
-                        <button type="button" onclick="removeExtra(${i})" 
-                            style="background:none; border:none; color:#e53e3e; cursor:pointer; font-size:0.75rem; font-weight:700; text-transform: uppercase; letter-spacing: 0.5px;">
-                            Rimuovi ✕
-                        </button>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
-                        <input type="text" placeholder="Nome e Cognome" class="ex-nome" data-idx="${i}" value="${p.nome}" 
-                            style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box;">
-                        
-                        <select class="ex-tipo" data-idx="${i}" 
-                            style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; background:white; font-size:1rem; box-sizing: border-box;">
-                            ${optionsHtml}
-                        </select>
-                        
-                        <textarea placeholder="Note (allergie, esigenze speciali - opzionale)" class="ex-note" data-idx="${i}" 
-                            style="width:100%; padding:12px; border:1px solid #cbd5e0; border-radius:8px; font-size:1rem; box-sizing: border-box; resize:vertical; min-height:60px; font-family:inherit;">${p.note || ''}</textarea>
-                    </div>
-                `;
-                    extrasListEl.appendChild(div);
-                });
-                bindExtraListeners();
-                updateTotal();
-            }
-
-            // Listener per il Leader (fissi, non cambiano mai)
-            const leaderEmailInput = document.getElementById('leader-email');
-            const leaderNameInput = document.getElementById('leader-name');
-            const leaderTelefonoInput = document.getElementById('leader-telefono');
-            const leaderNoteInput = document.getElementById('leader-note');
-
-            leaderNameInput.oninput = (e) => { leaderData.nome = e.target.value; };
-            leaderEmailInput.oninput = (e) => { leaderData.email = e.target.value; };
-            leaderTelefonoInput.oninput = (e) => { leaderData.telefono = e.target.value; };
-            leaderNoteInput.oninput = (e) => { leaderData.note = e.target.value; };
-
-            leaderEmailInput.onblur = (e) => {
-                const val = e.target.value.trim();
-                const errorDiv = document.getElementById('email-error');
-                if (val !== "" && !validateEmailFormat(val)) {
-                    e.target.style.borderColor = "#e53e3e";
-                    e.target.style.borderWidth = "2px";
-                    errorDiv.style.display = "block";
-                } else {
-                    e.target.style.borderColor = "#cbd5e0";
-                    e.target.style.borderWidth = "1px";
-                    errorDiv.style.display = "none";
-                }
-            };
-
-            function bindExtraListeners() {
-                document.querySelectorAll('.ex-nome').forEach(el => {
-                    el.oninput = (e) => { extraParticipants[e.target.dataset.idx].nome = e.target.value; };
-                });
-                document.querySelectorAll('.ex-tipo').forEach(el => {
-                    el.onchange = (e) => {
-                        extraParticipants[e.target.dataset.idx].tipo = e.target.value;
-                        updateTotal();
-                    };
-                });
-                document.querySelectorAll('.ex-note').forEach(el => {
-                    el.oninput = (e) => { extraParticipants[e.target.dataset.idx].note = e.target.value; };
-                });
-            }
-
-            window.removeExtra = (i) => { extraParticipants.splice(i, 1); renderExtras(); };
-            document.getElementById('add-btn').onclick = () => {
-                // Controllo campi capogruppo prima di aggiungere altri
-                if (!leaderData.nome || leaderData.nome.trim() === '') {
-                    showValidationError("Per favore, inserisci prima il Nome e Cognome del Capogruppo.");
-                    document.getElementById('leader-name').focus();
-                    return;
-                }
-                if (!leaderData.email || !validateEmailFormat(leaderData.email)) {
-                    showValidationError("Per favore, inserisci una Email valida per il Capogruppo.");
-                    document.getElementById('leader-email').focus();
-                    return;
-                }
-                if (!leaderData.telefono || leaderData.telefono.trim() === '') {
-                    showValidationError("Per favore, inserisci il Numero di telefono del Capogruppo.");
-                    document.getElementById('leader-telefono').focus();
-                    return;
-                }
-
-                extraParticipants.push({ nome: '', tipo: 'adulto', note: '' });
-                renderExtras();
-            };
-
-            // Unifica i dati per il backend
-            function getFullData() {
-                return [leaderData, ...extraParticipants];
-            }
-
-            function showValidationError(msg) {
-                let errDiv = document.getElementById('global-error-msg');
-                if (!errDiv) {
-                    errDiv = document.createElement('div');
-                    errDiv.id = 'global-error-msg';
-                    // Modal backdrop
-                    errDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; display:none; justify-content:center; align-items:center;";
-
-                    // Modal content
-                    const contentDiv = document.createElement('div');
-                    contentDiv.style.cssText = "background:white; padding:30px; border-radius:12px; width:90%; max-width:400px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2); font-family:inherit; animation: fadeIn 0.2s ease-out;";
-
-                    // Icon
-                    const icon = document.createElement('div');
-                    icon.innerHTML = '<span style="display:inline-block; background:#fff5f5; color:#fc8181; width:60px; height:60px; line-height:60px; border-radius:50%; font-size:30px;">⚠️</span>';
-                    icon.style.cssText = "margin-bottom:20px;";
-                    contentDiv.appendChild(icon);
-
-                    // Message text
-                    const msgP = document.createElement('p');
-                    msgP.id = 'global-error-text';
-                    msgP.style.cssText = "margin:0 0 25px 0; color:#2d3748; font-size:1.1rem; line-height:1.5; font-weight:600;";
-                    contentDiv.appendChild(msgP);
-
-                    // Close button
-                    const closeBtn = document.createElement('button');
-                    closeBtn.innerText = 'OK, ho capito';
-                    closeBtn.style.cssText = "width:100%; padding:14px; background:#38a169; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:1rem; transition: transform 0.1s;";
-                    closeBtn.onclick = () => { errDiv.style.display = 'none'; };
-                    contentDiv.appendChild(closeBtn);
-
-                    errDiv.appendChild(contentDiv);
-                    document.body.appendChild(errDiv);
-
-                    // Close on click outside
-                    errDiv.onclick = (e) => {
-                        if (e.target === errDiv) errDiv.style.display = 'none';
-                    };
-
-                    // Add animation keyframes
-                    const style = document.createElement('style');
-                    style.innerHTML = `@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }`;
-                    document.head.appendChild(style);
-                }
-                const textEl = document.getElementById('global-error-text');
-                if (textEl) textEl.innerText = msg;
-                errDiv.style.display = 'flex';
-            }
-
-            function validateAll() {
-                if (!leaderData.nome || !leaderData.email || !validateEmailFormat(leaderData.email)) {
-                    showValidationError("Dati Capogruppo mancanti o email non valida!");
-                    return false;
-                }
-                if (!leaderData.telefono || leaderData.telefono.trim() === '') {
-                    showValidationError("Il numero di telefono del Capogruppo è obbligatorio!");
-                    return false;
-                }
-                for (let p of extraParticipants) {
-                    if (!p.nome) {
-                        showValidationError("Inserisci il nome di tutti i partecipanti extra.");
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            // PAYPAL
-            paypal.Buttons({
-                fundingSource: paypal.FUNDING.PAYPAL,
-                onClick: (data, actions) => {
-                    const isValid = validateAll();
-                    if (!isValid) {
-                        return actions.reject();
-                    }
-                    return actions.resolve();
-                },
-                createOrder: async (data, actions) => {
-                    const res = await fetch(`${API_BASE}/create-order`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            eventId: EVENT_ID,
-                            participants: getFullData()
-                        })
-                    });
-                    const order = await res.json();
-                    return order.id;
-                },
-                onApprove: async (data) => {
-                    const res = await fetch(`${API_BASE}/capture-order`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            orderID: data.orderID,
-                            eventId: EVENT_ID,
-                            participants: getFullData()
-                        })
-                    });
-                    if (res.ok) {
-                        // Redirect alla pagina di successo con email e event
-                        window.location.href = `/registrazione/success.html?email=${encodeURIComponent(leaderData.email)}&event=${EVENT_ID}`;
-                    } else {
-                        showValidationError('Si è verificato un errore. Contattaci se il problema persiste.');
-                    }
-                }
-            }).render('#paypal-button-container');
-
-            renderExtras(); // Avvio
-        }
-    </script>
+    <script type="module" src="js/main.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,346 @@
+/* Global Reset & Body */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Loading Modal */
+#loading-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 20vh;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3182ce;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Main Container */
+#event-reg-root {
+    max-width: 600px;
+    margin: 20px auto;
+    padding-bottom: 150px;
+    border: 1px solid #e1e1e1;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    overflow: hidden;
+    display: none; /* Hidden initially */
+}
+
+/* Header */
+.header-section {
+    background: #f8f9fa;
+    padding: 25px;
+    border-bottom: 1px solid #eee;
+}
+
+.header-section h2 {
+    margin: 0;
+    color: #1a1a1a;
+    font-size: 1.6rem;
+    letter-spacing: -0.5px;
+}
+
+.header-section p, .event-info {
+    margin: 8px 0 0;
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.event-date, .event-location {
+    color: #666;
+    margin: 10px 0 5px 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+.event-location {
+    margin: 5px 0 20px 0;
+}
+
+/* Body Content */
+.content-section {
+    padding: 25px;
+}
+
+/* Leader Section */
+#leader-section {
+    padding: 20px;
+    border: 2px solid #3182ce;
+    border-radius: 12px;
+    background: #ebf8ff;
+    margin-bottom: 25px;
+}
+
+.section-label {
+    font-weight: 800;
+    font-size: 0.75rem;
+    color: #3182ce;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+/* Form Elements */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #3182ce;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* Error Messages */
+.error-msg {
+    color: #e53e3e;
+    font-size: 0.75rem;
+    margin-top: 5px;
+    display: none;
+    font-weight: 600;
+}
+
+/* Ticket Label */
+#leader-ticket-label {
+    font-size: 0.9rem;
+    color: #2c5282;
+    font-weight: 700;
+    background: #fff;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #bee3f8;
+}
+
+/* Extras Section */
+h4.extras-title {
+    margin: 0 0 15px;
+    color: #4a5568;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.participant-card {
+    position: relative;
+    margin-bottom: 20px;
+    padding: 20px;
+    border: 2px solid #cbd5e0;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.participant-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.participant-label {
+    font-weight: 800;
+    font-size: 0.75rem;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+    color: #e53e3e;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Add Button */
+#add-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+    background: #fff;
+    border: 2px dashed #cbd5e0;
+    border-radius: 10px;
+    color: #4a5568;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+}
+
+#add-btn:hover {
+    background: #f7fafc;
+    border-color: #a0aec0;
+}
+
+/* Sticky Footer */
+#sticky-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    padding: 15px;
+    box-shadow: 0 -4px 6px rgba(0,0,0,0.05);
+    z-index: 100;
+}
+
+.footer-content {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-label {
+    font-weight: 700;
+    color: #4a5568;
+}
+
+#total-display {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #2d3748;
+}
+
+#paypal-button-container {
+    min-height: 45px;
+}
+
+/* Error Modal (Dynamic) */
+#global-error-msg {
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+}
+.error-modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    animation: fadeIn 0.2s ease-out;
+}
+.error-modal-icon {
+    display: inline-block;
+    background: #fff5f5;
+    color: #fc8181;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    border-radius: 50%;
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+.error-modal-text {
+    margin: 0 0 25px 0;
+    color: #2d3748;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    font-weight: 600;
+}
+.error-modal-btn {
+    width: 100%;
+    padding: 14px;
+    background: #38a169;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: transform 0.1s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Missing Params Error */
+.missing-params {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+.missing-params h1 { color: #e53e3e; }
+.missing-params p { font-size: 18px; color: #4a5568; margin: 20px 0; }
+.code-block {
+    background: #f7fafc;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+.code-block-large {
+    background: #f7fafc;
+    padding: 8px 12px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 10px;
+}
