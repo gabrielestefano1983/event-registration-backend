@@ -2,6 +2,17 @@ const { supabase } = require('./utils/supabase');
 const { TIPO_LABELS } = require('./utils/constants');
 
 exports.handler = async (event) => {
+    // Controllo Password
+    const checkinPassword = process.env.CHECKIN_PAGE_PASSWORD;
+    const clientPassword = event.headers['x-checkin-password'];
+
+    if (checkinPassword && clientPassword !== checkinPassword) {
+        return {
+            statusCode: 401,
+            body: JSON.stringify({ message: "Non autorizzato" })
+        };
+    }
+
     // 1. GESTIONE RICERCA (GET)
     if (event.httpMethod === 'GET') {
         const query = event.queryStringParameters.q;

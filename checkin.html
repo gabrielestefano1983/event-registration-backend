@@ -293,8 +293,20 @@
         Staff Check-in Scanner
     </header>
 
+    <!-- LOGIN VIEW -->
+    <div id="view-login" class="view active"
+        style="background: #f0f2f5; z-index: 50; position: absolute; top: 0; left: 0; padding-top: 100px; height: 100%; box-sizing: border-box;">
+        <h2 style="margin-bottom: 20px; color: #333;">Accesso Staff</h2>
+        <input type="password" id="login-password" class="search-input" placeholder="Password Check-in"
+            style="max-width: 320px;" onkeyup="if(event.key === 'Enter') doLogin()">
+        <button onclick="doLogin()" class="btn-large btn-primary"
+            style="width: 100%; max-width: 320px; margin-top: 15px;">Entra</button>
+        <div id="login-error" style="color: #dc3545; margin-top: 15px; display: none; font-weight: bold;">Password
+            errata. Riprova.</div>
+    </div>
+
     <!-- MAIN CAMERA VIEW -->
-    <div id="view-scan" class="view active">
+    <div id="view-scan" class="view">
         <div id="scan-container">
             <div id="reader"></div>
         </div>
@@ -342,11 +354,49 @@
     <script>
         let html5QrcodeScanner;
         let isScanning = false;
+        let authPassword = sessionStorage.getItem('checkinPassword') || '';
 
         // Auto-start on load
         window.onload = () => {
-            startScanner();
+            if (authPassword) {
+                document.getElementById('view-login').classList.remove('active');
+                document.getElementById('view-scan').classList.add('active');
+                startScanner();
+            }
         };
+
+        async function doLogin() {
+            const pwd = document.getElementById('login-password').value;
+            const errDiv = document.getElementById('login-error');
+            errDiv.style.display = 'none';
+
+            if (!pwd) return;
+
+            openOverlay('view-loading');
+            try {
+                const res = await fetch('/api/verify-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pwd })
+                });
+                const data = await res.json();
+                closeOverlay('view-loading');
+
+                if (res.status === 200 && data.valid) {
+                    authPassword = pwd;
+                    sessionStorage.setItem('checkinPassword', pwd);
+                    document.getElementById('view-login').classList.remove('active');
+                    document.getElementById('view-scan').classList.add('active');
+                    startScanner();
+                } else {
+                    errDiv.style.display = 'block';
+                }
+            } catch (e) {
+                closeOverlay('view-loading');
+                errDiv.innerText = "Errore di connessione. Riprova.";
+                errDiv.style.display = 'block';
+            }
+        }
 
         function toggleCamera() {
             if (isScanning) stopScanner();
@@ -423,9 +473,20 @@
             try {
                 const response = await fetch('/api/checkin', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-checkin-password': authPassword
+                    },
                     body: JSON.stringify({ qr_token: token })
                 });
+
+                if (response.status === 401) {
+                    closeOverlay('view-loading');
+                    alert("Sessione scaduta o password errata.");
+                    sessionStorage.removeItem('checkinPassword');
+                    window.location.reload();
+                    return;
+                }
 
                 const data = await response.json();
                 closeOverlay('view-loading');
@@ -517,7 +578,19 @@
             list.innerHTML = '<div style="text-align:center;">Ricerca in corso...</div>';
 
             try {
-                const res = await fetch(`/api/checkin?q=${encodeURIComponent(query)}`);
+                const res = await fetch(`/api/checkin?q=${encodeURIComponent(query)}`, {
+                    headers: {
+                        'x-checkin-password': authPassword
+                    }
+                });
+
+                if (res.status === 401) {
+                    alert("Sessione scaduta o password errata.");
+                    sessionStorage.removeItem('checkinPassword');
+                    window.location.reload();
+                    return;
+                }
+
                 const data = await res.json();
 
                 if (res.status !== 200) throw new Error(data.error || "Errore");
